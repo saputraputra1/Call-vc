@@ -1,0 +1,4026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Couple & Group Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #ff6b6b;
+            --primary-hover: #ff5252;
+            --secondary-color: #f5f5f5;
+            --text-color: #333;
+            --text-light: #777;
+            --bg-color: white;
+            --message-sent: #ff6b6b;
+            --message-received: #e0e0e0;
+            --read-receipt: #4da6ff;
+            --group-color: #4a6bff;
+            --group-hover: #3a56d4;
+            --group-message: #4a6bff;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--secondary-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: var(--bg-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .login-container, .chat-container, .group-container {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .login-container {
+            justify-content: center;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+            transition: color 0.3s;
+        }
+        
+        input {
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.2);
+            outline: none;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .group-btn {
+            background-color: var(--group-color);
+        }
+        
+        .group-btn:hover {
+            background-color: var(--group-hover);
+        }
+        
+        .chat-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .group-header {
+            background-color: var(--group-color);
+        }
+        
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: var(--secondary-color);
+            scroll-behavior: smooth;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            border-radius: 18px;
+            max-width: 70%;
+            word-wrap: break-word;
+            position: relative;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInUp 0.3s forwards;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .message:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .sent {
+            background-color: var(--message-sent);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+            animation-delay: 0.1s;
+        }
+        
+        .received {
+            background-color: var(--message-received);
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+            animation-delay: 0.1s;
+        }
+        
+        .group-message {
+            background-color: var(--group-message);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+            animation-delay: 0.1s;
+        }
+        
+        .message-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #eee;
+            background-color: var(--bg-color);
+            transition: all 0.3s;
+        }
+        
+        .message-input input {
+            flex: 1;
+            margin-bottom: 0;
+            margin-right: 10px;
+        }
+        
+        .message-footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 5px;
+            font-size: 11px;
+        }
+        
+        .timestamp {
+            color: rgba(255, 255, 255, 0.7);
+            margin-right: 5px;
+        }
+        
+        .received .timestamp {
+            color: var(--text-light);
+        }
+        
+        .status-indicator {
+            margin-left: 5px;
+            font-size: 12px;
+        }
+        
+        .message-status {
+            display: flex;
+            align-items: center;
+        }
+        
+        .status-sent {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .status-delivered {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .status-read {
+            color: var(--read-receipt);
+        }
+        
+        .received .status-sent,
+        .received .status-delivered,
+        .received .status-read {
+            color: var(--text-light);
+        }
+        
+        .typing-indicator {
+            font-size: 12px;
+            color: var(--text-light);
+            font-style: italic;
+            margin-left: 10px;
+            height: 18px;
+            transition: all 0.3s;
+            opacity: 0;
+            transform: translateY(5px);
+        }
+        
+        .typing-indicator.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .online-status {
+            font-size: 12px;
+            color: #4CAF50;
+            display: flex;
+            align-items: center;
+        }
+        
+        .online-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .last-seen {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        
+        .hidden {
+            display: none !important;
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        /* Message reactions */
+        .message-reactions {
+            position: absolute;
+            bottom: -10px;
+            right: 10px;
+            display: flex;
+            background: white;
+            border-radius: 15px;
+            padding: 2px 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            z-index: 5;
+        }
+        
+        .sent .message-reactions {
+            right: auto;
+            left: 10px;
+        }
+        
+        .reaction {
+            font-size: 12px;
+            margin: 0 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .reaction:hover {
+            transform: scale(1.3);
+        }
+        
+        .reaction.active {
+            color: #ff6b6b;
+            transform: scale(1.2);
+        }
+        
+        .reaction-count {
+            font-size: 10px;
+            margin-left: 2px;
+        }
+        
+        /* Message actions */
+        .message-actions {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 10;
+            overflow: hidden;
+            animation: fadeIn 0.2s;
+        }
+        
+        .message:hover .message-actions {
+            display: flex;
+        }
+        
+        .message-action {
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .message-action:hover {
+            background: #f0f0f0;
+        }
+        
+        .sent .message-actions {
+            right: auto;
+            left: -10px;
+        }
+        
+        /* Starred message indicator */
+        .starred-indicator {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            color: gold;
+            font-size: 12px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+        }
+        
+        .sent .starred-indicator {
+            right: auto;
+            left: -5px;
+        }
+
+        /* Media and file styles */
+        .media-message {
+            max-width: 100%;
+            margin-bottom: 5px;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .media-message img, .media-message video {
+            max-width: 100%;
+            border-radius: 12px;
+            max-height: 300px;
+            object-fit: contain;
+            transition: transform 0.3s;
+        }
+        
+        .media-message img:hover, .media-message video:hover {
+            transform: scale(1.02);
+        }
+
+        .file-message {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+        }
+        
+        .file-message:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .file-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+
+        .file-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .file-name {
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-size {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .received .file-size {
+            color: var(--text-light);
+        }
+
+        .file-download {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s;
+        }
+        
+        .file-download:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+
+        .progress-bar {
+            height: 5px;
+            background-color: #4CAF50;
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .attach-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            margin-right: 10px;
+            padding: 5px;
+            color: var(--primary-color);
+            transition: all 0.3s;
+        }
+        
+        .attach-button:hover {
+            transform: rotate(15deg);
+        }
+
+        .file-preview {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .file-preview-remove {
+            margin-left: 8px;
+            cursor: pointer;
+            color: var(--primary-color);
+            transition: all 0.3s;
+        }
+        
+        .file-preview-remove:hover {
+            transform: scale(1.2);
+        }
+
+        /* Call controls */
+        .call-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .call-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .call-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .call-button.end-call {
+            background-color: #ff5252;
+        }
+
+        .call-button.accept-call {
+            background-color: #4CAF50;
+        }
+
+        .call-button.decline-call {
+            background-color: #ff5252;
+        }
+
+        .call-button.mute {
+            background-color: #2196F3;
+        }
+
+        .call-button.speaker {
+            background-color: #FFC107;
+        }
+
+        /* Updated Call Container */
+        .call-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            color: white;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            pointer-events: none;
+        }
+
+        .call-container:not(.hidden) {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .video-container {
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+            margin-bottom: 20px;
+            animation: zoomIn 0.5s;
+        }
+        
+        @keyframes zoomIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .remote-video {
+            width: 100%;
+            background-color: #333;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .local-video {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 120px;
+            height: 90px;
+            background-color: #333;
+            border-radius: 5px;
+            border: 2px solid white;
+            transition: all 0.3s;
+        }
+
+        .call-info {
+            text-align: center;
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s;
+        }
+
+        .call-timer {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .call-status {
+            font-size: 18px;
+        }
+
+        .incoming-call {
+            text-align: center;
+            animation: fadeIn 0.5s;
+        }
+
+        .call-buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .action-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+        
+        .action-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        /* Theme selector */
+        .theme-selector {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+        
+        .theme-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .theme-button:hover {
+            transform: rotate(15deg) scale(1.1);
+        }
+        
+        .theme-panel {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            padding: 15px;
+            width: 250px;
+            display: none;
+            animation: fadeInDown 0.3s;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .theme-panel.show {
+            display: block;
+        }
+        
+        .theme-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin: 5px;
+            cursor: pointer;
+            display: inline-block;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .theme-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .theme-option.active {
+            border-color: #333;
+            transform: scale(1.1);
+        }
+        
+        /* Edit message modal */
+        .edit-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .edit-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .edit-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            animation: fadeInUp 0.3s;
+        }
+        
+        .edit-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        /* Group info modal */
+        .group-info-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .group-info-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .group-info-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: fadeInUp 0.3s;
+        }
+        
+        .group-info-title {
+            margin-top: 0;
+            color: var(--group-color);
+            text-align: center;
+        }
+        
+        .group-info-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .group-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+        
+        .group-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .group-members-count {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+        
+        .group-members-list {
+            margin-top: 20px;
+        }
+        
+        .member-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+        
+        .member-name {
+            flex: 1;
+        }
+        
+        .member-role {
+            font-size: 12px;
+            color: var(--group-color);
+            font-weight: 500;
+        }
+        
+        .member-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .member-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-light);
+            transition: all 0.3s;
+        }
+        
+        .member-action:hover {
+            color: var(--group-color);
+        }
+        
+        /* Group settings */
+        .group-settings {
+            margin-top: 20px;
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .setting-label {
+            font-weight: 500;
+        }
+        
+        .setting-value {
+            color: var(--text-light);
+        }
+        
+        .setting-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--group-color);
+            font-weight: 500;
+        }
+        
+        /* Group creation form */
+        .group-form {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .avatar-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .avatar-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            color: #ccc;
+        }
+        
+        .avatar-upload-btn {
+            background: none;
+            border: none;
+            color: var(--group-color);
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-hover);
+        }
+        
+        /* Loading animation */
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .loading-dot {
+            width: 10px;
+            height: 10px;
+            margin: 0 5px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+        
+        .loading-dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+        
+        .loading-dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        
+        /* Pulse animation for new messages */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .new-message {
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        /* Navigation tabs */
+        .nav-tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .nav-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .nav-tab.active {
+            border-bottom: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .nav-tab:hover:not(.active) {
+            border-bottom: 2px solid #ddd;
+        }
+        
+        /* Group list */
+        .group-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .group-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .group-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .group-item-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+        
+        .group-item-info {
+            flex: 1;
+        }
+        
+        .group-item-name {
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+        
+        .group-item-last-message {
+            font-size: 12px;
+            color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .group-item-time {
+            font-size: 10px;
+            color: var(--text-light);
+            align-self: flex-start;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .login-container, .chat-container, .group-container {
+                padding: 20px;
+            }
+            
+            .message {
+                max-width: 85%;
+            }
+            
+            .theme-panel {
+                width: 200px;
+            }
+            
+            .group-info-content {
+                width: 95%;
+                max-height: 90vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Theme Selector -->
+        <div class="theme-selector">
+            <button class="theme-button" id="themeButton">🎨</button>
+            <div class="theme-panel" id="themePanel">
+                <h3 style="margin-top: 0;">Pilih Tema</h3>
+                <div id="themeOptions"></div>
+            </div>
+        </div>
+        
+        <!-- Login Screen -->
+        <div class="login-container" id="loginScreen">
+            <h1>Couple & Group Chat</h1>
+            <div class="nav-tabs">
+                <div class="nav-tab active" id="coupleTab">Couple Chat</div>
+                <div class="nav-tab" id="groupTab">Group Chat</div>
+            </div>
+            
+            <!-- Couple Login -->
+            <div id="coupleLogin">
+                <input type="text" id="coupleId" placeholder="Masukkan ID Pasangan">
+                <input type="password" id="password" placeholder="Masukkan Password">
+                <button id="loginBtn">Masuk</button>
+                <p style="text-align: center; margin-top: 20px;">Belum punya ID? <a href="#" id="createNewBtn">Buat baru</a></p>
+            </div>
+            
+            <!-- Group Login -->
+            <div id="groupLogin" class="hidden">
+                <input type="text" id="username" placeholder="Masukkan Username Anda">
+                <input type="file" id="profilePic" accept="image/*" style="display: none;">
+                <button id="setProfileBtn" class="group-btn">Set Profile</button>
+                <div style="text-align: center; margin: 20px 0;">
+                    <button id="createGroupBtn" class="group-btn">Buat Grup Baru</button>
+                    <button id="joinGroupBtn" class="group-btn">Gabung Grup</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Create New Couple Screen -->
+        <div class="login-container hidden" id="createScreen">
+            <h1>Buat Chat Baru</h1>
+            <input type="text" id="newCoupleId" placeholder="Buat ID Pasangan">
+            <input type="text" id="user1Name" placeholder="Nama Kamu">
+            <input type="text" id="user2Name" placeholder="Nama Pacar Kamu">
+            <input type="password" id="newPassword" placeholder="Buat Password">
+            <button id="createBtn">Buat</button>
+            <p style="text-align: center; margin-top: 20px;">Sudah punya ID? <a href="#" id="backToLoginBtn">Kembali ke login</a></p>
+        </div>
+        
+        <!-- Create Group Screen -->
+        <div class="login-container hidden" id="createGroupScreen">
+            <h1>Buat Grup Baru</h1>
+            <div class="group-form">
+                <div class="avatar-upload">
+                    <div id="groupAvatarPreview" class="avatar-preview">G</div>
+                    <button id="uploadGroupAvatarBtn" class="avatar-upload-btn">Unggah Foto Grup</button>
+                    <input type="file" id="groupAvatarInput" accept="image/*" style="display: none;">
+                </div>
+                <input type="text" id="groupName" placeholder="Nama Grup">
+                <input type="text" id="groupDesc" placeholder="Deskripsi Grup (opsional)">
+                <button id="createGroupSubmitBtn" class="group-btn">Buat Grup</button>
+                <p style="text-align: center; margin-top: 20px;"><a href="#" id="backToGroupLoginBtn">Kembali</a></p>
+            </div>
+        </div>
+        
+        <!-- Join Group Screen -->
+        <div class="login-container hidden" id="joinGroupScreen">
+            <h1>Gabung Grup</h1>
+            <input type="text" id="groupId" placeholder="Masukkan ID Grup">
+            <button id="joinGroupSubmitBtn" class="group-btn">Gabung</button>
+            <p style="text-align: center; margin-top: 20px;"><a href="#" id="backToGroupLoginBtn2">Kembali</a></p>
+        </div>
+        
+        <!-- Group List Screen -->
+        <div class="login-container hidden" id="groupListScreen">
+            <h1>Grup Saya</h1>
+            <div class="group-list" id="groupList">
+                <!-- Groups will be listed here -->
+            </div>
+            <button id="newGroupBtn" class="group-btn" style="margin-top: 20px;">Buat Grup Baru</button>
+            <p style="text-align: center; margin-top: 20px;"><a href="#" id="logoutGroupBtn">Keluar</a></p>
+        </div>
+        
+        <!-- Chat Screen -->
+        <div class="chat-container hidden" id="chatScreen">
+            <div class="chat-header">
+                <button class="back-button" id="backButton">←</button>
+                <h2 id="chatTitle">Couple Chat</h2>
+                <div id="partnerStatus" class="last-seen"></div>
+            </div>
+            <div class="messages" id="messages">
+                <!-- Messages will appear here -->
+            </div>
+            <div class="typing-indicator" id="typingIndicator"></div>
+            <div id="filePreview" class="hidden"></div>
+            <div class="message-input">
+                <input type="text" id="messageInput" placeholder="Ketik pesan...">
+                <input type="file" id="fileInput" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar" style="display: none;">
+                <button id="attachBtn" class="attach-button" title="Lampirkan file">📎</button>
+                <button id="sendBtn">Kirim</button>
+            </div>
+            <div class="call-controls">
+                <button id="voiceCallBtn" class="call-button" title="Voice Call">📞</button>
+                <button id="videoCallBtn" class="call-button" title="Video Call">🎥</button>
+            </div>
+        </div>
+        
+        <!-- Group Chat Screen -->
+        <div class="chat-container hidden" id="groupChatScreen">
+            <div class="chat-header group-header">
+                <button class="back-button" id="backGroupButton">←</button>
+                <h2 id="groupChatTitle">Group Chat</h2>
+                <div id="groupInfoBtn" style="cursor: pointer;">ℹ️</div>
+            </div>
+            <div class="messages" id="groupMessages">
+                <!-- Group messages will appear here -->
+            </div>
+            <div class="typing-indicator" id="groupTypingIndicator"></div>
+            <div id="groupFilePreview" class="hidden"></div>
+            <div class="message-input">
+                <input type="text" id="groupMessageInput" placeholder="Ketik pesan...">
+                <input type="file" id="groupFileInput" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar" style="display: none;">
+                <button id="groupAttachBtn" class="attach-button" title="Lampirkan file">📎</button>
+                <button id="groupSendBtn" class="group-btn">Kirim</button>
+            </div>
+        </div>
+
+        <!-- Call Container -->
+        <div id="callContainer" class="call-container hidden">
+            <div id="incomingCall" class="incoming-call hidden">
+                <h2 id="callerName">Panggilan Masuk</h2>
+                <p id="callType">Voice Call</p>
+                <div class="call-buttons">
+                    <button id="acceptCallBtn" class="call-button accept-call">✓</button>
+                    <button id="declineCallBtn" class="call-button decline-call">✕</button>
+                </div>
+            </div>
+            
+            <div id="ongoingCall" class="hidden">
+                <div class="video-container">
+                    <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
+                    <video id="localVideo" class="local-video" autoplay playsinline muted></video>
+                </div>
+                <div class="call-info">
+                    <div id="callTimer" class="call-timer">00:00</div>
+                    <div id="callStatus" class="call-status">Sedang Berbicara dengan <span id="callPartnerName"></span></div>
+                </div>
+                <div class="call-controls">
+                    <button id="muteBtn" class="call-button mute" title="Mute">🔇</button>
+                    <button id="speakerBtn" class="call-button speaker" title="Speaker">🔊</button>
+                    <button id="endCallBtn" class="call-button end-call" title="End Call">✕</button>
+                </div>
+                <div class="action-buttons">
+                    <button id="switchCameraBtn" class="action-button hidden" title="Switch Camera">🔄</button>
+                    <button id="toggleVideoBtn" class="action-button" title="Turn Off Video">📹</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Edit Message Modal -->
+        <div class="edit-modal" id="editModal">
+            <div class="edit-content">
+                <h3 style="margin-top: 0;">Edit Pesan</h3>
+                <textarea id="editMessageInput" style="width: 100%; min-height: 100px; padding: 10px; border-radius: 5px; border: 1px solid #ddd;"></textarea>
+                <div class="edit-buttons">
+                    <button id="cancelEditBtn" style="background: #f5f5f5; color: #333;">Batal</button>
+                    <button id="saveEditBtn" style="background: var(--primary-color); color: white;">Simpan</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Group Info Modal -->
+        <div class="group-info-modal" id="groupInfoModal">
+            <div class="group-info-content">
+                <h3 class="group-info-title" id="groupInfoTitle">Info Grup</h3>
+                
+                <div class="group-info-header">
+                    <img id="groupInfoAvatar" class="group-avatar" src="" alt="Group Avatar">
+                    <div>
+                        <div class="group-name" id="groupInfoName">Nama Grup</div>
+                        <div class="group-members-count" id="groupInfoMembers">0 anggota</div>
+                    </div>
+                </div>
+                
+                <div class="group-settings">
+                    <div class="setting-item">
+                        <div class="setting-label">Nama Grup</div>
+                        <button class="setting-action" id="editGroupNameBtn">Edit</button>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">Foto Grup</div>
+                        <button class="setting-action" id="editGroupAvatarBtn">Edit</button>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">Deskripsi Grup</div>
+                        <button class="setting-action" id="editGroupDescBtn">Edit</button>
+                    </div>
+                </div>
+                
+                <h4 style="margin: 20px 0 10px;">Anggota Grup</h4>
+                <div class="group-members-list" id="groupMembersList">
+                    <!-- Members will be listed here -->
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button id="addMemberBtn" class="group-btn">Tambah Anggota</button>
+                    <button id="leaveGroupBtn" style="background: #f5f5f5; color: #333; margin-top: 10px;">Keluar Grup</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Add Member Modal -->
+        <div class="edit-modal" id="addMemberModal">
+            <div class="edit-content">
+                <h3 style="margin-top: 0;">Tambah Anggota</h3>
+                <input type="text" id="newMemberId" placeholder="Masukkan ID Pengguna">
+                <div class="edit-buttons">
+                    <button id="cancelAddMemberBtn" style="background: #f5f5f5; color: #333;">Batal</button>
+                    <button id="confirmAddMemberBtn" style="background: var(--group-color); color: white;">Tambah</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    
+    <script>
+        // Your Firebase configuration for Couple Chat
+        const firebaseConfig = {
+            apiKey: "AIzaSyAQVIvZvxmYdcriHR8j0ormGzNRjGD0_no",
+            authDomain: "online--suit.firebaseapp.com",
+            databaseURL: "https://online--suit-default-rtdb.firebaseio.com",
+            projectId: "online--suit",
+            storageBucket: "online--suit.firebasestorage.app",
+            messagingSenderId: "463840835705",
+            appId: "1:463840835705:web:f490fd49851c0afb8dfca8"
+        };
+
+        // Second Firebase configuration for Group Chat
+        const groupFirebaseConfig = {
+            apiKey: "AIzaSyAQVIvZvxmYdcriHR8j0ormGzNRjGD0_no",
+            authDomain: "online--suit.firebaseapp.com",
+            databaseURL: "https://online--suit-default-rtdb.firebaseio.com",
+            projectId: "online--suit",
+            storageBucket: "online--suit.firebasestorage.app",
+            messagingSenderId: "463840835705",
+            appId: "1:463840835705:web:f490fd49851c0afb8dfca8"
+        };
+
+        // Initialize Firebase apps
+        const coupleApp = firebase.initializeApp(firebaseConfig, 'coupleApp');
+        const groupApp = firebase.initializeApp(groupFirebaseConfig, 'groupApp');
+        
+        // Get references to both databases and storage
+        const coupleDatabase = firebase.database(coupleApp);
+        const coupleStorage = firebase.storage(coupleApp);
+        const groupDatabase = firebase.database(groupApp);
+        const groupStorage = firebase.storage(groupApp);
+
+        // DOM Elements
+        const loginScreen = document.getElementById('loginScreen');
+        const createScreen = document.getElementById('createScreen');
+        const chatScreen = document.getElementById('chatScreen');
+        const groupChatScreen = document.getElementById('groupChatScreen');
+        const createGroupScreen = document.getElementById('createGroupScreen');
+        const joinGroupScreen = document.getElementById('joinGroupScreen');
+        const groupListScreen = document.getElementById('groupListScreen');
+        
+        // Couple elements
+        const coupleTab = document.getElementById('coupleTab');
+        const groupTab = document.getElementById('groupTab');
+        const coupleLogin = document.getElementById('coupleLogin');
+        const groupLogin = document.getElementById('groupLogin');
+        const loginBtn = document.getElementById('loginBtn');
+        const createBtn = document.getElementById('createBtn');
+        const createNewBtn = document.getElementById('createNewBtn');
+        const backToLoginBtn = document.getElementById('backToLoginBtn');
+        const backButton = document.getElementById('backButton');
+        const sendBtn = document.getElementById('sendBtn');
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const chatTitle = document.getElementById('chatTitle');
+        const partnerStatus = document.getElementById('partnerStatus');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const fileInput = document.getElementById('fileInput');
+        const attachBtn = document.getElementById('attachBtn');
+        const filePreview = document.getElementById('filePreview');
+        const voiceCallBtn = document.getElementById('voiceCallBtn');
+        const videoCallBtn = document.getElementById('videoCallBtn');
+        
+        // Group elements
+        const usernameInput = document.getElementById('username');
+        const profilePicInput = document.getElementById('profilePic');
+        const setProfileBtn = document.getElementById('setProfileBtn');
+        const createGroupBtn = document.getElementById('createGroupBtn');
+        const joinGroupBtn = document.getElementById('joinGroupBtn');
+        const backGroupButton = document.getElementById('backGroupButton');
+        const groupChatTitle = document.getElementById('groupChatTitle');
+        const groupMessages = document.getElementById('groupMessages');
+        const groupMessageInput = document.getElementById('groupMessageInput');
+        const groupFileInput = document.getElementById('groupFileInput');
+        const groupAttachBtn = document.getElementById('groupAttachBtn');
+        const groupSendBtn = document.getElementById('groupSendBtn');
+        const groupTypingIndicator = document.getElementById('groupTypingIndicator');
+        const groupFilePreview = document.getElementById('groupFilePreview');
+        const groupList = document.getElementById('groupList');
+        const newGroupBtn = document.getElementById('newGroupBtn');
+        const logoutGroupBtn = document.getElementById('logoutGroupBtn');
+        const backToGroupLoginBtn = document.getElementById('backToGroupLoginBtn');
+        const backToGroupLoginBtn2 = document.getElementById('backToGroupLoginBtn2');
+        const createGroupSubmitBtn = document.getElementById('createGroupSubmitBtn');
+        const joinGroupSubmitBtn = document.getElementById('joinGroupSubmitBtn');
+        const groupAvatarPreview = document.getElementById('groupAvatarPreview');
+        const groupAvatarInput = document.getElementById('groupAvatarInput');
+        const uploadGroupAvatarBtn = document.getElementById('uploadGroupAvatarBtn');
+        const groupNameInput = document.getElementById('groupName');
+        const groupDescInput = document.getElementById('groupDesc');
+        const groupIdInput = document.getElementById('groupId');
+        
+        // Group info elements
+        const groupInfoBtn = document.getElementById('groupInfoBtn');
+        const groupInfoModal = document.getElementById('groupInfoModal');
+        const groupInfoTitle = document.getElementById('groupInfoTitle');
+        const groupInfoAvatar = document.getElementById('groupInfoAvatar');
+        const groupInfoName = document.getElementById('groupInfoName');
+        const groupInfoMembers = document.getElementById('groupInfoMembers');
+        const groupMembersList = document.getElementById('groupMembersList');
+        const editGroupNameBtn = document.getElementById('editGroupNameBtn');
+        const editGroupAvatarBtn = document.getElementById('editGroupAvatarBtn');
+        const editGroupDescBtn = document.getElementById('editGroupDescBtn');
+        const addMemberBtn = document.getElementById('addMemberBtn');
+        const leaveGroupBtn = document.getElementById('leaveGroupBtn');
+        
+        // Add member elements
+        const addMemberModal = document.getElementById('addMemberModal');
+        const newMemberIdInput = document.getElementById('newMemberId');
+        const cancelAddMemberBtn = document.getElementById('cancelAddMemberBtn');
+        const confirmAddMemberBtn = document.getElementById('confirmAddMemberBtn');
+        
+        // Call elements
+        const callContainer = document.getElementById('callContainer');
+        const incomingCall = document.getElementById('incomingCall');
+        const ongoingCall = document.getElementById('ongoingCall');
+        const callerName = document.getElementById('callerName');
+        const callType = document.getElementById('callType');
+        const acceptCallBtn = document.getElementById('acceptCallBtn');
+        const declineCallBtn = document.getElementById('declineCallBtn');
+        const remoteVideo = document.getElementById('remoteVideo');
+        const localVideo = document.getElementById('localVideo');
+        const callTimer = document.getElementById('callTimer');
+        const callStatus = document.getElementById('callStatus');
+        const callPartnerName = document.getElementById('callPartnerName');
+        const muteBtn = document.getElementById('muteBtn');
+        const speakerBtn = document.getElementById('speakerBtn');
+        const endCallBtn = document.getElementById('endCallBtn');
+        const switchCameraBtn = document.getElementById('switchCameraBtn');
+        const toggleVideoBtn = document.getElementById('toggleVideoBtn');
+        
+        // Theme elements
+        const themeButton = document.getElementById('themeButton');
+        const themePanel = document.getElementById('themePanel');
+        const themeOptions = document.getElementById('themeOptions');
+        
+        // Edit message elements
+        const editModal = document.getElementById('editModal');
+        const editMessageInput = document.getElementById('editMessageInput');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const saveEditBtn = document.getElementById('saveEditBtn');
+
+        // Variables
+        // Couple chat variables
+        let currentCoupleId = '';
+        let currentUser = '';
+        let partnerUser = '';
+        let partnerName = '';
+        let typingTimeout;
+        let lastSeenTimeout;
+        let isTyping = false;
+        let lastMessageId = '';
+        let selectedFile = null;
+        let currentlyEditingMessageId = '';
+        let partnerIsOnline = false;
+        
+        // Group chat variables
+        let currentGroupId = '';
+        let currentUserId = '';
+        let currentUsername = '';
+        let currentUserAvatar = '';
+        let currentGroupData = null;
+        let currentGroupMembers = {};
+        let currentGroupAdmins = {};
+        let currentGroupSelectedFile = null;
+        let groupTypingTimeout;
+        let isGroupTyping = false;
+        let lastGroupMessageId = '';
+        
+        // Call variables
+        let peerConnection;
+        let localStream;
+        let remoteStream;
+        let callTimerInterval;
+        let callStartTime;
+        let isMuted = false;
+        let isSpeakerOn = false;
+        let isVideoOn = true;
+        let currentCallId = '';
+        let isCaller = false;
+        let currentCallType = ''; // 'voice' or 'video'
+        let currentCamera = 'user'; // 'user' or 'environment'
+        let servers = {
+            iceServers: [
+                {
+                    urls: [
+                        'stun:stun1.l.google.com:19302',
+                        'stun:stun2.l.google.com:19302'
+                    ]
+                }
+            ]
+        };
+        
+        // Theme definitions
+        const themes = [
+            {
+                name: "Classic Pink",
+                primary: "#ff6b6b",
+                primaryHover: "#ff5252",
+                secondary: "#f5f5f5",
+                text: "#333",
+                textLight: "#777",
+                bg: "white",
+                messageSent: "#ff6b6b",
+                messageReceived: "#e0e0e0",
+                readReceipt: "#4da6ff",
+                groupColor: "#4a6bff",
+                groupHover: "#3a56d4",
+                groupMessage: "#4a6bff"
+            },
+            {
+                name: "Ocean Blue",
+                primary: "#4285f4",
+                primaryHover: "#3367d6",
+                secondary: "#e8f0fe",
+                text: "#202124",
+                textLight: "#5f6368",
+                bg: "white",
+                messageSent: "#4285f4",
+                messageReceived: "#e8f0fe",
+                readReceipt: "#34a853",
+                groupColor: "#0f9d58",
+                groupHover: "#0b8043",
+                groupMessage: "#0f9d58"
+            },
+            {
+                name: "Forest Green",
+                primary: "#0f9d58",
+                primaryHover: "#0b8043",
+                secondary: "#e6f4ea",
+                text: "#202124",
+                textLight: "#5f6368",
+                bg: "white",
+                messageSent: "#0f9d58",
+                messageReceived: "#e6f4ea",
+                readReceipt: "#fbbc05",
+                groupColor: "#673ab7",
+                groupHover: "#5e35b1",
+                groupMessage: "#673ab7"
+            },
+            {
+                name: "Royal Purple",
+                primary: "#673ab7",
+                primaryHover: "#5e35b1",
+                secondary: "#f3e5f5",
+                text: "#202124",
+                textLight: "#5f6368",
+                bg: "white",
+                messageSent: "#673ab7",
+                messageReceived: "#f3e5f5",
+                readReceipt: "#ff5722",
+                groupColor: "#ff9800",
+                groupHover: "#f57c00",
+                groupMessage: "#ff9800"
+            },
+            {
+                name: "Sunset Orange",
+                primary: "#ff9800",
+                primaryHover: "#f57c00",
+                secondary: "#fff3e0",
+                text: "#202124",
+                textLight: "#5f6368",
+                bg: "white",
+                messageSent: "#ff9800",
+                messageReceived: "#fff3e0",
+                readReceipt: "#9c27b0",
+                groupColor: "#ff6b6b",
+                groupHover: "#ff5252",
+                groupMessage: "#ff6b6b"
+            },
+            {
+                name: "Dark Mode",
+                primary: "#bb86fc",
+                primaryHover: "#9a67ea",
+                secondary: "#121212",
+                text: "#e1e1e1",
+                textLight: "#aaaaaa",
+                bg: "#1e1e1e",
+                messageSent: "#bb86fc",
+                messageReceived: "#2d2d2d",
+                readReceipt: "#03dac6",
+                groupColor: "#03dac6",
+                groupHover: "#018786",
+                groupMessage: "#03dac6"
+            }
+        ];
+
+        // Event Listeners
+        // Navigation tabs
+        coupleTab.addEventListener('click', () => {
+            coupleTab.classList.add('active');
+            groupTab.classList.remove('active');
+            coupleLogin.classList.remove('hidden');
+            groupLogin.classList.add('hidden');
+        });
+        
+        groupTab.addEventListener('click', () => {
+            groupTab.classList.add('active');
+            coupleTab.classList.remove('active');
+            groupLogin.classList.remove('hidden');
+            coupleLogin.classList.add('hidden');
+        });
+
+        // Couple chat events
+        createNewBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginScreen.classList.add('hidden');
+            createScreen.classList.remove('hidden');
+        });
+
+        backToLoginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            createScreen.classList.add('hidden');
+            loginScreen.classList.remove('hidden');
+        });
+
+        backButton.addEventListener('click', () => {
+            // Clean up listeners when leaving chat
+            coupleDatabase.ref('couples/' + currentCoupleId + '/typing').off();
+            coupleDatabase.ref('couples/' + currentCoupleId + '/online').off();
+            coupleDatabase.ref('couples/' + currentCoupleId + '/lastSeen').off();
+            coupleDatabase.ref('couples/' + currentCoupleId + '/calls').off();
+            
+            // Set user as offline
+            updateUserStatus(false);
+            
+            chatScreen.classList.add('hidden');
+            loginScreen.classList.remove('hidden');
+        });
+
+        loginBtn.addEventListener('click', login);
+        createBtn.addEventListener('click', createNewCouple);
+        sendBtn.addEventListener('click', sendMessage);
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Typing indicator
+        messageInput.addEventListener('input', () => {
+            if (!isTyping) {
+                isTyping = true;
+                coupleDatabase.ref('couples/' + currentCoupleId + '/typing/' + currentUser).set(true);
+            }
+            
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                isTyping = false;
+                coupleDatabase.ref('couples/' + currentCoupleId + '/typing/' + currentUser).set(false);
+            }, 1000);
+        });
+
+        // File attachment
+        attachBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                selectedFile = e.target.files[0];
+                showFilePreview(selectedFile);
+            }
+        });
+
+        // Call buttons
+        voiceCallBtn.addEventListener('click', () => {
+            startCall('voice');
+        });
+
+        videoCallBtn.addEventListener('click', () => {
+            startCall('video');
+        });
+
+        acceptCallBtn.addEventListener('click', acceptCall);
+        declineCallBtn.addEventListener('click', declineCall);
+        endCallBtn.addEventListener('click', endCall);
+        muteBtn.addEventListener('click', toggleMute);
+        speakerBtn.addEventListener('click', toggleSpeaker);
+        toggleVideoBtn.addEventListener('click', toggleVideo);
+        switchCameraBtn.addEventListener('click', switchCamera);
+        
+        // Group chat events
+        setProfileBtn.addEventListener('click', setUserProfile);
+        profilePicInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    currentUserAvatar = event.target.result;
+                    setProfileBtn.textContent = 'Profile Diupdate';
+                    setTimeout(() => {
+                        setProfileBtn.textContent = 'Set Profile';
+                    }, 2000);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        createGroupBtn.addEventListener('click', () => {
+            if (!currentUsername) {
+                alert('Silakan set username dan foto profil terlebih dahulu');
+                return;
+            }
+            groupLogin.classList.add('hidden');
+            createGroupScreen.classList.remove('hidden');
+        });
+        
+        joinGroupBtn.addEventListener('click', () => {
+            if (!currentUsername) {
+                alert('Silakan set username dan foto profil terlebih dahulu');
+                return;
+            }
+            groupLogin.classList.add('hidden');
+            joinGroupScreen.classList.remove('hidden');
+        });
+        
+        backGroupButton.addEventListener('click', () => {
+            // Clean up group listeners
+            if (currentGroupId) {
+                groupDatabase.ref('groups/' + currentGroupId + '/messages').off();
+                groupDatabase.ref('groups/' + currentGroupId + '/typing').off();
+            }
+            
+            groupChatScreen.classList.add('hidden');
+            groupListScreen.classList.remove('hidden');
+        });
+        
+        backToGroupLoginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            createGroupScreen.classList.add('hidden');
+            groupLogin.classList.remove('hidden');
+        });
+        
+        backToGroupLoginBtn2.addEventListener('click', (e) => {
+            e.preventDefault();
+            joinGroupScreen.classList.add('hidden');
+            groupLogin.classList.remove('hidden');
+        });
+        
+        createGroupSubmitBtn.addEventListener('click', createGroup);
+        joinGroupSubmitBtn.addEventListener('click', joinGroup);
+        
+        uploadGroupAvatarBtn.addEventListener('click', () => {
+            groupAvatarInput.click();
+        });
+        
+        groupAvatarInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    groupAvatarPreview.style.backgroundImage = `url(${event.target.result})`;
+                    groupAvatarPreview.style.backgroundSize = 'cover';
+                    groupAvatarPreview.textContent = '';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        groupSendBtn.addEventListener('click', sendGroupMessage);
+        
+        groupMessageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendGroupMessage();
+            }
+        });
+        
+        // Group typing indicator
+        groupMessageInput.addEventListener('input', () => {
+            if (!isGroupTyping) {
+                isGroupTyping = true;
+                groupDatabase.ref('groups/' + currentGroupId + '/typing/' + currentUserId).set(currentUsername);
+            }
+            
+            clearTimeout(groupTypingTimeout);
+            groupTypingTimeout = setTimeout(() => {
+                isGroupTyping = false;
+                groupDatabase.ref('groups/' + currentGroupId + '/typing/' + currentUserId).set(null);
+            }, 1000);
+        });
+        
+        // Group file attachment
+        groupAttachBtn.addEventListener('click', () => {
+            groupFileInput.click();
+        });
+
+        groupFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                currentGroupSelectedFile = e.target.files[0];
+                showGroupFilePreview(currentGroupSelectedFile);
+            }
+        });
+        
+        // Group info and management
+        groupInfoBtn.addEventListener('click', showGroupInfo);
+        
+        editGroupNameBtn.addEventListener('click', () => {
+            const newName = prompt('Masukkan nama grup baru:', groupInfoName.textContent);
+            if (newName && newName.trim() !== '') {
+                groupDatabase.ref('groups/' + currentGroupId + '/name').set(newName.trim())
+                    .then(() => {
+                        groupInfoName.textContent = newName.trim();
+                        groupChatTitle.textContent = newName.trim();
+                    })
+                    .catch(error => {
+                        console.error('Error updating group name:', error);
+                        alert('Gagal mengupdate nama grup');
+                    });
+            }
+        });
+        
+        editGroupAvatarBtn.addEventListener('click', () => {
+            groupAvatarInput.click();
+        });
+        
+        editGroupDescBtn.addEventListener('click', () => {
+            const newDesc = prompt('Masukkan deskripsi grup baru:', currentGroupData.description || '');
+            if (newDesc !== null) {
+                groupDatabase.ref('groups/' + currentGroupId + '/description').set(newDesc.trim())
+                    .catch(error => {
+                        console.error('Error updating group description:', error);
+                        alert('Gagal mengupdate deskripsi grup');
+                    });
+            }
+        });
+        
+        addMemberBtn.addEventListener('click', () => {
+            addMemberModal.classList.add('show');
+        });
+        
+        cancelAddMemberBtn.addEventListener('click', () => {
+            addMemberModal.classList.remove('show');
+            newMemberIdInput.value = '';
+        });
+        
+        confirmAddMemberBtn.addEventListener('click', addMemberToGroup);
+        
+        newMemberIdInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addMemberToGroup();
+            }
+        });
+        
+        leaveGroupBtn.addEventListener('click', leaveGroup);
+        
+        newGroupBtn.addEventListener('click', () => {
+            groupListScreen.classList.add('hidden');
+            createGroupScreen.classList.remove('hidden');
+        });
+        
+        logoutGroupBtn.addEventListener('click', () => {
+            // Clean up group listeners
+            if (currentGroupId) {
+                groupDatabase.ref('groups/' + currentGroupId + '/messages').off();
+                groupDatabase.ref('groups/' + currentGroupId + '/typing').off();
+            }
+            
+            // Reset group variables
+            currentGroupId = '';
+            currentGroupData = null;
+            currentGroupMembers = {};
+            currentGroupAdmins = {};
+            
+            groupListScreen.classList.add('hidden');
+            groupLogin.classList.remove('hidden');
+        });
+        
+        // Theme selector
+        themeButton.addEventListener('click', toggleThemePanel);
+        
+        // Edit message
+        cancelEditBtn.addEventListener('click', () => {
+            editModal.classList.remove('show');
+        });
+        
+        saveEditBtn.addEventListener('click', saveEditedMessage);
+
+        // Functions
+        function toggleThemePanel() {
+            themePanel.classList.toggle('show');
+        }
+        
+        function initThemes() {
+            themes.forEach((theme, index) => {
+                const themeOption = document.createElement('div');
+                themeOption.className = 'theme-option';
+                themeOption.style.backgroundColor = theme.primary;
+                themeOption.title = theme.name;
+                
+                if (index === 0) {
+                    themeOption.classList.add('active');
+                }
+                
+                themeOption.addEventListener('click', () => {
+                    applyTheme(theme);
+                    document.querySelectorAll('.theme-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    themeOption.classList.add('active');
+                    themePanel.classList.remove('show');
+                    
+                    // Save theme preference
+                    localStorage.setItem('coupleChatTheme', JSON.stringify(theme));
+                });
+                
+                themeOptions.appendChild(themeOption);
+            });
+            
+            // Load saved theme
+            const savedTheme = localStorage.getItem('coupleChatTheme');
+            if (savedTheme) {
+                applyTheme(JSON.parse(savedTheme));
+            }
+        }
+        
+        function applyTheme(theme) {
+            document.documentElement.style.setProperty('--primary-color', theme.primary);
+            document.documentElement.style.setProperty('--primary-hover', theme.primaryHover);
+            document.documentElement.style.setProperty('--secondary-color', theme.secondary);
+            document.documentElement.style.setProperty('--text-color', theme.text);
+            document.documentElement.style.setProperty('--text-light', theme.textLight);
+            document.documentElement.style.setProperty('--bg-color', theme.bg);
+            document.documentElement.style.setProperty('--message-sent', theme.messageSent);
+            document.documentElement.style.setProperty('--message-received', theme.messageReceived);
+            document.documentElement.style.setProperty('--read-receipt', theme.readReceipt);
+            document.documentElement.style.setProperty('--group-color', theme.groupColor);
+            document.documentElement.style.setProperty('--group-hover', theme.groupHover);
+            document.documentElement.style.setProperty('--group-message', theme.groupMessage);
+        }
+
+        function showFilePreview(file) {
+            filePreview.innerHTML = '';
+            filePreview.classList.remove('hidden');
+            
+            const previewDiv = document.createElement('div');
+            previewDiv.className = 'file-preview';
+            
+            const fileInfo = document.createElement('div');
+            fileInfo.className = 'file-info';
+            
+            const fileName = document.createElement('div');
+            fileName.className = 'file-name';
+            fileName.textContent = file.name;
+            
+            const fileSize = document.createElement('div');
+            fileSize.className = 'file-size';
+            fileSize.textContent = formatFileSize(file.size);
+            
+            const removeBtn = document.createElement('span');
+            removeBtn.className = 'file-preview-remove';
+            removeBtn.textContent = '✕';
+            removeBtn.addEventListener('click', () => {
+                selectedFile = null;
+                fileInput.value = '';
+                filePreview.classList.add('hidden');
+            });
+            
+            fileInfo.appendChild(fileName);
+            fileInfo.appendChild(fileSize);
+            previewDiv.appendChild(fileInfo);
+            previewDiv.appendChild(removeBtn);
+            filePreview.appendChild(previewDiv);
+        }
+        
+        function showGroupFilePreview(file) {
+            groupFilePreview.innerHTML = '';
+            groupFilePreview.classList.remove('hidden');
+            
+            const previewDiv = document.createElement('div');
+            previewDiv.className = 'file-preview';
+            
+            const fileInfo = document.createElement('div');
+            fileInfo.className = 'file-info';
+            
+            const fileName = document.createElement('div');
+            fileName.className = 'file-name';
+            fileName.textContent = file.name;
+            
+            const fileSize = document.createElement('div');
+            fileSize.className = 'file-size';
+            fileSize.textContent = formatFileSize(file.size);
+            
+            const removeBtn = document.createElement('span');
+            removeBtn.className = 'file-preview-remove';
+            removeBtn.textContent = '✕';
+            removeBtn.addEventListener('click', () => {
+                currentGroupSelectedFile = null;
+                groupFileInput.value = '';
+                groupFilePreview.classList.add('hidden');
+            });
+            
+            fileInfo.appendChild(fileName);
+            fileInfo.appendChild(fileSize);
+            previewDiv.appendChild(fileInfo);
+            previewDiv.appendChild(removeBtn);
+            groupFilePreview.appendChild(previewDiv);
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function getFileIcon(type) {
+            if (type.includes('image')) return '🖼️';
+            if (type.includes('video')) return '🎬';
+            if (type.includes('pdf')) return '📄';
+            if (type.includes('word') || type.includes('document')) return '📝';
+            if (type.includes('excel') || type.includes('spreadsheet')) return '📊';
+            if (type.includes('powerpoint') || type.includes('presentation')) return '📑';
+            if (type.includes('zip') || type.includes('compressed')) return '🗜️';
+            return '📁';
+        }
+
+        function login() {
+            const coupleId = document.getElementById('coupleId').value;
+            const password = document.getElementById('password').value;
+            
+            if (!coupleId || !password) {
+                alert('ID dan password harus diisi');
+                return;
+            }
+            
+            // Check if couple exists
+            coupleDatabase.ref('couples/' + coupleId).once('value')
+                .then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const coupleData = snapshot.val();
+                        
+                        // Simple password check (in a real app, use proper hashing)
+                        if (coupleData.password === password) {
+                            currentCoupleId = coupleId;
+                            
+                            // Ask which user is logging in
+                            const userChoice = prompt(`Anda login sebagai:\n1. ${coupleData.user1}\n2. ${coupleData.user2}\nMasukkan angka (1 atau 2):`);
+                            
+                            if (userChoice === '1') {
+                                currentUser = 'user1';
+                                partnerUser = 'user2';
+                                partnerName = coupleData.user2;
+                                chatTitle.textContent = coupleData.user2;
+                            } else if (userChoice === '2') {
+                                currentUser = 'user2';
+                                partnerUser = 'user1';
+                                partnerName = coupleData.user1;
+                                chatTitle.textContent = coupleData.user1;
+                            } else {
+                                alert('Pilihan tidak valid');
+                                return;
+                            }
+                            
+                            // Set user as online
+                            updateUserStatus(true);
+                            
+                            // Show chat screen
+                            loginScreen.classList.add('hidden');
+                            chatScreen.classList.remove('hidden');
+                            
+                            // Load messages
+                            loadMessages();
+                            
+                            // Set up partner status listeners
+                            setupStatusListeners();
+                            
+                            // Set up call listeners
+                            setupCallListeners();
+                        } else {
+                            alert('Password salah');
+                        }
+                    } else {
+                        alert('ID pasangan tidak ditemukan');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error logging in:', error);
+                    alert('Terjadi kesalahan saat login');
+                });
+        }
+
+        function createNewCouple() {
+            const newCoupleId = document.getElementById('newCoupleId').value;
+            const user1Name = document.getElementById('user1Name').value;
+            const user2Name = document.getElementById('user2Name').value;
+            const newPassword = document.getElementById('newPassword').value;
+            
+            if (!newCoupleId || !user1Name || !user2Name || !newPassword) {
+                alert('Semua field harus diisi');
+                return;
+            }
+            
+            // Check if couple ID already exists
+            coupleDatabase.ref('couples/' + newCoupleId).once('value')
+                .then((snapshot) => {
+                    if (snapshot.exists()) {
+                        alert('ID pasangan sudah digunakan');
+                    } else {
+                        // Create new couple
+                        const coupleData = {
+                            user1: user1Name,
+                            user2: user2Name,
+                            password: newPassword, // In a real app, hash this password
+                            lastSeen: {
+                                user1: Date.now(),
+                                user2: Date.now()
+                            }
+                        };
+                        
+                        coupleDatabase.ref('couples/' + newCoupleId).set(coupleData)
+                            .then(() => {
+                                alert('Chat pasangan berhasil dibuat! Gunakan ID dan password untuk login.');
+                                createScreen.classList.add('hidden');
+                                loginScreen.classList.remove('hidden');
+                                
+                                // Clear create form
+                                document.getElementById('newCoupleId').value = '';
+                                document.getElementById('user1Name').value = '';
+                                document.getElementById('user2Name').value = '';
+                                document.getElementById('newPassword').value = '';
+                            })
+                            .catch((error) => {
+                                console.error('Error creating couple:', error);
+                                alert('Terjadi kesalahan saat membuat chat pasangan');
+                            });
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error checking couple ID:', error);
+                    alert('Terjadi kesalahan saat memeriksa ID pasangan');
+                });
+        }
+
+        function setupStatusListeners() {
+            // Listen for partner's typing status
+            coupleDatabase.ref('couples/' + currentCoupleId + '/typing/' + partnerUser).on('value', (snapshot) => {
+                if (snapshot.exists() && snapshot.val()) {
+                    typingIndicator.textContent = `${partnerName} sedang mengetik...`;
+                    typingIndicator.classList.add('active');
+                } else {
+                    typingIndicator.textContent = '';
+                    typingIndicator.classList.remove('active');
+                }
+            });
+            
+            // Listen for partner's online status
+            coupleDatabase.ref('couples/' + currentCoupleId + '/online/' + partnerUser).on('value', (snapshot) => {
+                partnerIsOnline = snapshot.exists() && snapshot.val();
+                
+                if (partnerIsOnline) {
+                    partnerStatus.innerHTML = `<div class="online-status"><div class="online-dot"></div>Online</div>`;
+                    
+                    // Update any pending messages to "delivered" status
+                    updatePendingMessagesStatus();
+                } else {
+                    // If not online, show last seen
+                    coupleDatabase.ref('couples/' + currentCoupleId + '/lastSeen/' + partnerUser).once('value')
+                        .then((lastSeenSnapshot) => {
+                            if (lastSeenSnapshot.exists()) {
+                                const lastSeenTime = formatLastSeen(lastSeenSnapshot.val());
+                                partnerStatus.textContent = `Terakhir dilihat ${lastSeenTime}`;
+                            }
+                        });
+                }
+            });
+            
+            // Update last seen periodically
+            lastSeenTimeout = setInterval(() => {
+                coupleDatabase.ref('couples/' + currentCoupleId + '/lastSeen/' + currentUser).set(Date.now());
+            }, 30000); // Update every 30 seconds
+        }
+
+        function updatePendingMessagesStatus() {
+            // Update all messages with status "sent" to "delivered"
+            coupleDatabase.ref('chats/' + currentCoupleId).orderByChild('status').equalTo('sent').once('value')
+                .then((snapshot) => {
+                    if (snapshot.exists()) {
+                        snapshot.forEach((childSnapshot) => {
+                            coupleDatabase.ref('chats/' + currentCoupleId + '/' + childSnapshot.key + '/read').set('delivered');
+                        });
+                    }
+                });
+        }
+
+        function setupCallListeners() {
+            // Listen for incoming calls
+            coupleDatabase.ref('couples/' + currentCoupleId + '/calls').on('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const calls = snapshot.val();
+                    const callId = Object.keys(calls)[0];
+                    const callData = calls[callId];
+                    
+                    // Check if this call is for the current user
+                    if (callData.callee === currentUser && callData.status === 'ringing') {
+                        showIncomingCall(callId, callData);
+                    }
+                    
+                    // Check if call was answered or declined
+                    if (callData.caller === currentUser || callData.callee === currentUser) {
+                        if (callData.status === 'answered' && !peerConnection) {
+                            answerCall(callId, callData);
+                        } else if (callData.status === 'ended') {
+                            endCall();
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateUserStatus(isOnline) {
+            coupleDatabase.ref('couples/' + currentCoupleId + '/online/' + currentUser).set(isOnline);
+            coupleDatabase.ref('couples/' + currentCoupleId + '/lastSeen/' + currentUser).set(Date.now());
+        }
+
+        function formatLastSeen(timestamp) {
+            const now = Date.now();
+            const diff = now - timestamp;
+            const minutes = Math.floor(diff / (1000 * 60));
+            
+            if (minutes < 1) {
+                return 'baru saja';
+            } else if (minutes < 60) {
+                return `${minutes} menit yang lalu`;
+            } else {
+                const hours = Math.floor(minutes / 60);
+                if (hours < 24) {
+                    return `${hours} jam yang lalu`;
+                } else {
+                    const days = Math.floor(hours / 24);
+                    return `${days} hari yang lalu`;
+                }
+            }
+        }
+
+        function loadMessages() {
+            coupleDatabase.ref('chats/' + currentCoupleId).on('value', (snapshot) => {
+                messagesContainer.innerHTML = '';
+                
+                if (snapshot.exists()) {
+                    const messages = snapshot.val();
+                    const messagesArray = Object.entries(messages);
+                    
+                    // Sort messages by timestamp
+                    messagesArray.sort((a, b) => a[1].timestamp - b[1].timestamp);
+                    
+                    messagesArray.forEach(([messageId, messageData]) => {
+                        const isSent = messageData.sender === currentUser;
+                        displayMessage(
+                            messageData.message || messageData.caption, 
+                            isSent, 
+                            messageData.timestamp, 
+                            messageData.read, 
+                            messageId,
+                            messageData.mediaType,
+                            messageData.mediaUrl,
+                            messageData.fileName,
+                            messageData.fileSize,
+                            messageData.edited,
+                            messageData.reactions,
+                            messageData.starred
+                        );
+                        
+                        // Track the last message ID
+                        lastMessageId = messageId;
+                    });
+                    
+                    // Scroll to bottom
+                    setTimeout(() => {
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    }, 100);
+                    
+                    // Mark messages as read if they're from partner
+                    markMessagesAsRead();
+                }
+            });
+        }
+
+        function displayMessage(message, isSent, timestamp, readStatus, messageId, mediaType, mediaUrl, fileName, fileSize, edited, reactions, starred) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(isSent ? 'sent' : 'received');
+            messageDiv.dataset.messageId = messageId;
+            
+            // Add star indicator if message is starred
+            if (starred) {
+                const starIndicator = document.createElement('div');
+                starIndicator.className = 'starred-indicator';
+                starIndicator.innerHTML = '★';
+                messageDiv.appendChild(starIndicator);
+            }
+            
+            // Add message actions (edit/delete/star)
+            if (isSent) {
+                const messageActions = document.createElement('div');
+                messageActions.className = 'message-actions';
+                
+                const starAction = document.createElement('div');
+                starAction.className = 'message-action';
+                starAction.innerHTML = starred ? '★' : '☆';
+                starAction.title = starred ? 'Unstar message' : 'Star message';
+                starAction.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleStarMessage(messageId, !starred);
+                });
+                
+                const editAction = document.createElement('div');
+                editAction.className = 'message-action';
+                editAction.textContent = '✏️';
+                editAction.title = 'Edit';
+                editAction.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    editMessage(messageId, message);
+                });
+                
+                const deleteAction = document.createElement('div');
+                deleteAction.className = 'message-action';
+                deleteAction.textContent = '🗑️';
+                deleteAction.title = 'Delete';
+                deleteAction.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteMessage(messageId);
+                });
+                
+                messageActions.appendChild(starAction);
+                messageActions.appendChild(editAction);
+                messageActions.appendChild(deleteAction);
+                messageDiv.appendChild(messageActions);
+            } else {
+                // For received messages, only show star action
+                const messageActions = document.createElement('div');
+                messageActions.className = 'message-actions';
+                
+                const starAction = document.createElement('div');
+                starAction.className = 'message-action';
+                starAction.innerHTML = starred ? '★' : '☆';
+                starAction.title = starred ? 'Unstar message' : 'Star message';
+                starAction.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleStarMessage(messageId, !starred);
+                });
+                
+                messageActions.appendChild(starAction);
+                messageDiv.appendChild(messageActions);
+            }
+            
+            if (mediaUrl) {
+                if (mediaType === 'image' || mediaType === 'video') {
+                    const mediaDiv = document.createElement('div');
+                    mediaDiv.classList.add('media-message');
+                    
+                    if (mediaType === 'image') {
+                        const img = document.createElement('img');
+                        img.src = mediaUrl;
+                        img.alt = 'Gambar';
+                        mediaDiv.appendChild(img);
+                    } else if (mediaType === 'video') {
+                        const video = document.createElement('video');
+                        video.src = mediaUrl;
+                        video.controls = true;
+                        mediaDiv.appendChild(video);
+                    }
+                    
+                    messageDiv.appendChild(mediaDiv);
+                } else {
+                    // Ini adalah file dokumen
+                    const fileDiv = document.createElement('div');
+                    fileDiv.classList.add('file-message');
+                    
+                    const fileIcon = document.createElement('div');
+                    fileIcon.classList.add('file-icon');
+                    fileIcon.textContent = getFileIcon(mediaType);
+                    
+                    const fileInfoDiv = document.createElement('div');
+                    fileInfoDiv.classList.add('file-info');
+                    
+                    const fileNameDiv = document.createElement('div');
+                    fileNameDiv.classList.add('file-name');
+                    fileNameDiv.textContent = fileName;
+                    
+                    const fileSizeDiv = document.createElement('div');
+                    fileSizeDiv.classList.add('file-size');
+                    fileSizeDiv.textContent = formatFileSize(fileSize);
+                    
+                    const downloadLink = document.createElement('a');
+                    downloadLink.classList.add('file-download');
+                    downloadLink.href = mediaUrl;
+                    downloadLink.target = '_blank';
+                    downloadLink.textContent = 'Unduh';
+                    downloadLink.download = fileName;
+                    
+                    fileInfoDiv.appendChild(fileNameDiv);
+                    fileInfoDiv.appendChild(fileSizeDiv);
+                    fileDiv.appendChild(fileIcon);
+                    fileDiv.appendChild(fileInfoDiv);
+                    fileDiv.appendChild(downloadLink);
+                    
+                    messageDiv.appendChild(fileDiv);
+                }
+            }
+            
+            if (message) {
+                const messageText = document.createElement('div');
+                messageText.textContent = message;
+                messageDiv.appendChild(messageText);
+            }
+            
+            // Create message footer with timestamp and status
+            const messageFooter = document.createElement('div');
+            messageFooter.className = 'message-footer';
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'timestamp';
+            
+            // Format timestamp according to user's locale and timezone
+            const date = new Date(timestamp);
+            timeDiv.textContent = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            if (edited) {
+                const editedSpan = document.createElement('span');
+                editedSpan.textContent = ' (edited)';
+                editedSpan.style.fontSize = '10px';
+                editedSpan.style.opacity = '0.7';
+                timeDiv.appendChild(editedSpan);
+            }
+            
+            messageFooter.appendChild(timeDiv);
+            
+            // Add status indicators for sent messages
+            if (isSent) {
+                const statusDiv = document.createElement('div');
+                statusDiv.className = 'message-status';
+                
+                const statusIcon = document.createElement('span');
+                statusIcon.className = 'status-indicator';
+                
+                if (readStatus === 'read') {
+                    statusIcon.innerHTML = '<i class="fas fa-check-double"></i><i class="fas fa-check-double"></i>';
+                    statusIcon.classList.add('status-read');
+                } else if (readStatus === 'delivered') {
+                    statusIcon.innerHTML = '<i class="fas fa-check-double"></i>';
+                    statusIcon.classList.add('status-delivered');
+                } else {
+                    statusIcon.innerHTML = '<i class="fas fa-check"></i>';
+                    statusIcon.classList.add('status-sent');
+                }
+                
+                statusDiv.appendChild(statusIcon);
+                messageFooter.appendChild(statusDiv);
+            }
+            
+            messageDiv.appendChild(messageFooter);
+            
+            // Add reactions container
+            const reactionsContainer = document.createElement('div');
+            reactionsContainer.className = 'message-reactions';
+            
+            // Heart reaction
+            const heartReaction = document.createElement('div');
+            heartReaction.className = 'reaction' + (reactions && reactions.heart ? ' active' : '');
+            heartReaction.innerHTML = '❤️';
+            if (reactions && reactions.heart) {
+                const countSpan = document.createElement('span');
+                countSpan.className = 'reaction-count';
+                countSpan.textContent = reactions.heart.count || '';
+                heartReaction.appendChild(countSpan);
+            }
+            heartReaction.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleReaction(messageId, 'heart');
+            });
+            
+            reactionsContainer.appendChild(heartReaction);
+            messageDiv.appendChild(reactionsContainer);
+            
+            messagesContainer.appendChild(messageDiv);
+            
+            // Add animation for new messages
+            setTimeout(() => {
+                messageDiv.classList.add('new-message');
+                setTimeout(() => {
+                    messageDiv.classList.remove('new-message');
+                }, 500);
+            }, 10);
+        }
+
+        function sendMessage() {
+            const messageText = messageInput.value.trim();
+            
+            if (!messageText && !selectedFile) {
+                return;
+            }
+            
+            const timestamp = Date.now();
+            const messageId = coupleDatabase.ref('chats/' + currentCoupleId).push().key;
+            
+            if (selectedFile) {
+                // Upload file ke Firebase Storage
+                uploadFile(messageId, timestamp, messageText);
+            } else {
+                // Kirim pesan teks biasa
+                const messageData = {
+                    sender: currentUser,
+                    message: messageText,
+                    timestamp: timestamp,
+                    status: 'sent', // Initial status
+                    read: partnerIsOnline ? 'delivered' : 'sent', // Initial read status
+                    reactions: {}, // Initialize reactions
+                    starred: false // Initialize starred status
+                };
+                
+                coupleDatabase.ref('chats/' + currentCoupleId + '/' + messageId).set(messageData)
+                    .then(() => {
+                        messageInput.value = '';
+                        selectedFile = null;
+                        fileInput.value = '';
+                        filePreview.classList.add('hidden');
+                        coupleDatabase.ref('couples/' + currentCoupleId + '/typing/' + currentUser).set(false);
+                        isTyping = false;
+                    })
+                    .catch((error) => {
+                        console.error('Error sending message:', error);
+                        alert('Terjadi kesalahan saat mengirim pesan');
+                    });
+            }
+        }
+        
+        function editMessage(messageId, currentText) {
+            currentlyEditingMessageId = messageId;
+            editMessageInput.value = currentText;
+            editModal.classList.add('show');
+            editMessageInput.focus();
+        }
+        
+        function saveEditedMessage() {
+            const newText = editMessageInput.value.trim();
+            if (!newText || !currentlyEditingMessageId) {
+                return;
+            }
+            
+            coupleDatabase.ref('chats/' + currentCoupleId + '/' + currentlyEditingMessageId).update({
+                message: newText,
+                edited: true
+            })
+            .then(() => {
+                editModal.classList.remove('show');
+                currentlyEditingMessageId = '';
+            })
+            .catch(error => {
+                console.error('Error editing message:', error);
+                alert('Gagal mengedit pesan');
+            });
+        }
+        
+        function deleteMessage(messageId) {
+            if (confirm('Apakah Anda yakin ingin menghapus pesan ini?')) {
+                coupleDatabase.ref('chats/' + currentCoupleId + '/' + messageId).remove()
+                    .catch(error => {
+                        console.error('Error deleting message:', error);
+                        alert('Gagal menghapus pesan');
+                    });
+            }
+        }
+
+        function toggleStarMessage(messageId, starred) {
+            coupleDatabase.ref('chats/' + currentCoupleId + '/' + messageId + '/starred').set(starred)
+                .catch(error => {
+                    console.error('Error starring message:', error);
+                });
+        }
+
+        function toggleReaction(messageId, reactionType) {
+            const messageRef = coupleDatabase.ref('chats/' + currentCoupleId + '/' + messageId + '/reactions/' + reactionType);
+            
+            messageRef.transaction((current) => {
+                if (current) {
+                    // Toggle user's reaction
+                    if (current.users && current.users[currentUser]) {
+                        // User already reacted - remove reaction
+                        current.count = (current.count || 1) - 1;
+                        delete current.users[currentUser];
+                    } else {
+                        // User hasn't reacted - add reaction
+                        current.count = (current.count || 0) + 1;
+                        if (!current.users) current.users = {};
+                        current.users[currentUser] = true;
+                    }
+                } else {
+                    // Create new reaction
+                    current = {
+                        count: 1,
+                        users: {
+                            [currentUser]: true
+                        }
+                    };
+                }
+                return current;
+            });
+        }
+
+        function uploadFile(messageId, timestamp, caption) {
+            const storageRef = coupleStorage.ref();
+            const fileRef = storageRef.child(`couples/${currentCoupleId}/${messageId}_${selectedFile.name}`);
+            
+            // Tampilkan indikator upload
+            const uploadTask = fileRef.put(selectedFile);
+            
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log('Upload progress: ' + progress + '%');
+                },
+                (error) => {
+                    console.error('Upload error:', error);
+                    alert('Gagal mengunggah file');
+                },
+                () => {
+                    // Upload complete, get download URL
+                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                        // Determine media type
+                        let mediaType = 'file';
+                        if (selectedFile.type.includes('image')) {
+                            mediaType = 'image';
+                        } else if (selectedFile.type.includes('video')) {
+                            mediaType = 'video';
+                        }
+                        
+                        // Save message with file info
+                        const messageData = {
+                            sender: currentUser,
+                            caption: caption,
+                            timestamp: timestamp,
+                            status: 'sent',
+                            read: partnerIsOnline ? 'delivered' : 'sent',
+                            mediaType: mediaType,
+                            mediaUrl: downloadURL,
+                            fileName: selectedFile.name,
+                            fileSize: selectedFile.size,
+                            reactions: {},
+                            starred: false
+                        };
+                        
+                        coupleDatabase.ref('chats/' + currentCoupleId + '/' + messageId).set(messageData)
+                            .then(() => {
+                                messageInput.value = '';
+                                selectedFile = null;
+                                fileInput.value = '';
+                                filePreview.classList.add('hidden');
+                                coupleDatabase.ref('couples/' + currentCoupleId + '/typing/' + currentUser).set(false);
+                                isTyping = false;
+                            });
+                    });
+                }
+            );
+        }
+
+        function markMessagesAsRead() {
+            if (lastMessageId) {
+                coupleDatabase.ref('chats/' + currentCoupleId + '/' + lastMessageId).once('value')
+                    .then((snapshot) => {
+                        const messageData = snapshot.val();
+                        if (messageData && messageData.sender === partnerUser && messageData.read !== 'read') {
+                            coupleDatabase.ref('chats/' + currentCoupleId + '/' + lastMessageId + '/read').set('read');
+                        }
+                    });
+            }
+        }
+
+        async function startCall(type) {
+            currentCallType = type;
+            isCaller = true;
+            currentCallId = coupleDatabase.ref('couples/' + currentCoupleId + '/calls').push().key;
+            
+            try {
+                // Get user media
+                const constraints = {
+                    audio: true,
+                    video: type === 'video' ? { facingMode: 'user' } : false
+                };
+                
+                localStream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                // Create peer connection
+                createPeerConnection();
+                
+                // Add local stream to connection
+                localStream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, localStream);
+                });
+                
+                // Show local video if video call
+                if (type === 'video') {
+                    localVideo.srcObject = localStream;
+                    switchCameraBtn.classList.remove('hidden');
+                }
+                
+                // Create offer
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                
+                // Save call data
+                await coupleDatabase.ref('couples/' + currentCoupleId + '/calls/' + currentCallId).set({
+                    caller: currentUser,
+                    callee: partnerUser,
+                    type: type,
+                    status: 'ringing',
+                    offer: offer.toJSON()
+                });
+                
+                // Show calling UI
+                showCallingUI();
+                
+            } catch (error) {
+                console.error('Error starting call:', error);
+                alert('Gagal memulai panggilan. Pastikan Anda memberikan izin akses kamera/mikrofon.');
+                endCall();
+            }
+        }
+
+        function showIncomingCall(callId, callData) {
+            currentCallId = callId;
+            currentCallType = callData.type;
+            isCaller = false;
+            
+            // Update UI
+            callContainer.classList.remove('hidden');
+            incomingCall.classList.remove('hidden');
+            ongoingCall.classList.add('hidden');
+            
+            callerName.textContent = partnerName;
+            callType.textContent = callData.type === 'video' ? 'Video Call' : 'Voice Call';
+        }
+
+        async function acceptCall() {
+            try {
+                // Get user media
+                const constraints = {
+                    audio: true,
+                    video: currentCallType === 'video' ? { facingMode: 'user' } : false
+                };
+                
+                localStream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                // Create peer connection
+                createPeerConnection();
+                
+                // Add local stream to connection
+                localStream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, localStream);
+                });
+                
+                // Show local video if video call
+                if (currentCallType === 'video') {
+                    localVideo.srcObject = localStream;
+                    switchCameraBtn.classList.remove('hidden');
+                }
+                
+                // Get call data
+                const callRef = coupleDatabase.ref('couples/' + currentCoupleId + '/calls/' + currentCallId);
+                const callSnapshot = await callRef.once('value');
+                const callData = callSnapshot.val();
+                
+                // Set remote description
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(callData.offer));
+                
+                // Create answer
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                
+                // Update call status
+                await callRef.update({
+                    status: 'answered',
+                    answer: answer
+                });
+                
+                // Show ongoing call UI
+                incomingCall.classList.add('hidden');
+                ongoingCall.classList.remove('hidden');
+                callPartnerName.textContent = partnerName;
+                callStatus.textContent = `Sedang Berbicara dengan ${partnerName}`;
+                
+                // Start call timer
+                startCallTimer();
+                
+            } catch (error) {
+                console.error('Error accepting call:', error);
+                alert('Gagal menerima panggilan. Pastikan Anda memberikan izin akses kamera/mikrofon.');
+                endCall();
+            }
+        }
+
+        async function declineCall() {
+            if (currentCallId) {
+                await coupleDatabase.ref('couples/' + currentCoupleId + '/calls/' + currentCallId).update({
+                    status: 'declined'
+                });
+            }
+            endCall();
+        }
+
+        async function endCall() {
+            // Stop all tracks
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+            
+            // Close peer connection
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+            
+            // Clear call timer
+            if (callTimerInterval) {
+                clearInterval(callTimerInterval);
+                callTimerInterval = null;
+            }
+            
+            // Update call status if call is still active
+            if (currentCallId) {
+                const callRef = coupleDatabase.ref('couples/' + currentCoupleId + '/calls/' + currentCallId);
+                const callSnapshot = await callRef.once('value');
+                
+                if (callSnapshot.exists()) {
+                    const callData = callSnapshot.val();
+                    
+                    if (callData.status === 'ringing' || callData.status === 'answered') {
+                        await callRef.update({
+                            status: 'ended'
+                        });
+                    }
+                }
+                
+                // Remove call data after a delay
+                setTimeout(() => {
+                    callRef.remove();
+                }, 5000);
+            }
+            
+            // Reset call variables
+            currentCallId = '';
+            isCaller = false;
+            isMuted = false;
+            isSpeakerOn = false;
+            isVideoOn = true;
+            
+            // Hide call UI
+            callContainer.classList.add('hidden');
+            incomingCall.classList.add('hidden');
+            ongoingCall.classList.add('hidden');
+            
+            // Reset video elements
+            remoteVideo.srcObject = null;
+            localVideo.srcObject = null;
+        }
+
+        function createPeerConnection() {
+            peerConnection = new RTCPeerConnection(servers);
+            
+            // When remote stream arrives, display it
+            peerConnection.ontrack = (event) => {
+                remoteStream = event.streams[0];
+                remoteVideo.srcObject = remoteStream;
+                
+                // Enable speaker button once we have a remote stream
+                speakerBtn.disabled = false;
+            };
+            
+            // When ICE candidate is generated, send it to the other peer
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate && currentCallId) {
+                    coupleDatabase.ref('couples/' + currentCoupleId + '/calls/' + currentCallId + '/iceCandidates/' + currentUser)
+                        .push(event.candidate.toJSON());
+                }
+            };
+            
+            // Listen for ICE candidates from the other peer
+            if (currentCallId) {
+                coupleDatabase.ref('couples/' + currentCoupleId + '/calls/' + currentCallId + '/iceCandidates/' + partnerUser)
+                    .on('child_added', async (snapshot) => {
+                        const candidate = snapshot.val();
+                        try {
+                            await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                        } catch (error) {
+                            console.error('Error adding ICE candidate:', error);
+                        }
+                    });
+            }
+        }
+
+        function showCallingUI() {
+            callContainer.classList.remove('hidden');
+            incomingCall.classList.add('hidden');
+            ongoingCall.classList.remove('hidden');
+            
+            callPartnerName.textContent = partnerName;
+            callStatus.textContent = `Memanggil ${partnerName}...`;
+            
+            // Disable speaker button until connection is established
+            speakerBtn.disabled = true;
+        }
+
+        function startCallTimer() {
+            callStartTime = Date.now();
+            callTimerInterval = setInterval(updateCallTimer, 1000);
+        }
+
+        function updateCallTimer() {
+            const elapsed = Math.floor((Date.now() - callStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            callTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function toggleMute() {
+            if (localStream) {
+                const audioTracks = localStream.getAudioTracks();
+                if (audioTracks.length > 0) {
+                    isMuted = !audioTracks[0].enabled;
+                    audioTracks[0].enabled = !isMuted;
+                    muteBtn.textContent = isMuted ? '🎤' : '🔇'; // Toggle between mute and unmute icons
+                }
+            }
+        }
+
+        function toggleSpeaker() {
+            if (remoteVideo) {
+                isSpeakerOn = !isSpeakerOn;
+                if (isSpeakerOn) {
+                    remoteVideo.setAttribute('playsinline', 'false');
+                    try {
+                        remoteVideo.muted = false;
+                        // This might not work on all browsers due to autoplay policies
+                        remoteVideo.play().catch(e => console.log('Autoplay prevented:', e));
+                    } catch (e) {
+                        console.error('Error enabling speaker:', e);
+                    }
+                } else {
+                    remoteVideo.setAttribute('playsinline', 'true');
+                    remoteVideo.muted = true;
+                }
+                speakerBtn.textContent = isSpeakerOn ? '🔊' : '🔈'; // Toggle between speaker and no speaker icons
+            }
+        }
+
+        function toggleVideo() {
+            if (localStream && currentCallType === 'video') {
+                const videoTracks = localStream.getVideoTracks();
+                if (videoTracks.length > 0) {
+                    isVideoOn = !videoTracks[0].enabled;
+                    videoTracks[0].enabled = !isVideoOn;
+                    toggleVideoBtn.textContent = isVideoOn ? '📹' : '📷'; // Toggle between video on and off icons
+                    localVideo.style.display = isVideoOn ? 'block' : 'none';
+                }
+            }
+        }
+
+        async function switchCamera() {
+            if (localStream && currentCallType === 'video') {
+                currentCamera = currentCamera === 'user' ? 'environment' : 'user';
+                
+                // Stop current video tracks
+                localStream.getVideoTracks().forEach(track => track.stop());
+                
+                try {
+                    // Get new stream with switched camera
+                    const newStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: currentCamera },
+                        audio: true
+                    });
+                    
+                    // Replace the video track
+                    const videoTrack = newStream.getVideoTracks()[0];
+                    const sender = peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+                    
+                    if (sender) {
+                        sender.replaceTrack(videoTrack);
+                    }
+                    
+                    // Update local video display
+                    localStream.removeTrack(localStream.getVideoTracks()[0]);
+                    localStream.addTrack(videoTrack);
+                    localVideo.srcObject = localStream;
+                    
+                    // Close the unused stream
+                    newStream.getAudioTracks().forEach(track => track.stop());
+                    
+                } catch (error) {
+                    console.error('Error switching camera:', error);
+                }
+            }
+        }
+        
+        /* ============================================= */
+        /* ============ GROUP CHAT FUNCTIONS =========== */
+        /* ============================================= */
+        
+        function setUserProfile() {
+            const username = usernameInput.value.trim();
+            
+            if (!username) {
+                alert('Username harus diisi');
+                return;
+            }
+            
+            currentUsername = username;
+            currentUserId = generateUserId();
+            
+            // Save user profile to local storage
+            const userProfile = {
+                id: currentUserId,
+                username: currentUsername,
+                avatar: currentUserAvatar
+            };
+            localStorage.setItem('groupChatUser', JSON.stringify(userProfile));
+            
+            alert('Profile berhasil disimpan!');
+            loadUserGroups();
+        }
+        
+        function generateUserId() {
+            // Generate a random 8-character ID
+            return Math.random().toString(36).substring(2, 10);
+        }
+        
+        function generateGroupId() {
+            // Generate a random 5-digit group ID
+            return Math.floor(10000 + Math.random() * 90000).toString();
+        }
+        
+        function loadUserGroups() {
+            // Check if user has groups
+            groupDatabase.ref('users/' + currentUserId + '/groups').once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        const groups = snapshot.val();
+                        showGroupList(groups);
+                    } else {
+                        // No groups yet, show empty state
+                        groupList.innerHTML = '<p style="text-align: center;">Anda belum memiliki grup. Buat atau gabung grup untuk memulai.</p>';
+                        groupListScreen.classList.remove('hidden');
+                        groupLogin.classList.add('hidden');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading user groups:', error);
+                    alert('Gagal memuat daftar grup');
+                });
+        }
+        
+        function showGroupList(groups) {
+            groupList.innerHTML = '';
+            
+            if (!groups || Object.keys(groups).length === 0) {
+                groupList.innerHTML = '<p style="text-align: center;">Anda belum memiliki grup. Buat atau gabung grup untuk memulai.</p>';
+            } else {
+                // Get group details for each group
+                const groupPromises = Object.keys(groups).map(groupId => {
+                    return groupDatabase.ref('groups/' + groupId).once('value')
+                        .then(groupSnapshot => {
+                            const groupData = groupSnapshot.val();
+                            return {
+                                id: groupId,
+                                ...groupData
+                            };
+                        });
+                });
+                
+                Promise.all(groupPromises)
+                    .then(groupDetails => {
+                        // Sort groups by last message timestamp (newest first)
+                        groupDetails.sort((a, b) => {
+                            const timeA = a.lastMessage ? a.lastMessage.timestamp : a.createdAt;
+                            const timeB = b.lastMessage ? b.lastMessage.timestamp : b.createdAt;
+                            return timeB - timeA;
+                        });
+                        
+                        // Display each group
+                        groupDetails.forEach(group => {
+                            const groupItem = document.createElement('div');
+                            groupItem.className = 'group-item';
+                            groupItem.dataset.groupId = group.id;
+                            
+                            groupItem.innerHTML = `
+                                <img src="${group.avatar || ''}" class="group-item-avatar" onerror="this.src=''">
+                                <div class="group-item-info">
+                                    <div class="group-item-name">${group.name}</div>
+                                    <div class="group-item-last-message">${group.lastMessage ? group.lastMessage.text : 'Belum ada pesan'}</div>
+                                </div>
+                                <div class="group-item-time">${formatGroupTime(group.lastMessage ? group.lastMessage.timestamp : group.createdAt)}</div>
+                            `;
+                            
+                            groupItem.addEventListener('click', () => {
+                                openGroupChat(group.id);
+                            });
+                            
+                            groupList.appendChild(groupItem);
+                        });
+                    });
+            }
+            
+            groupListScreen.classList.remove('hidden');
+            groupLogin.classList.add('hidden');
+        }
+        
+        function formatGroupTime(timestamp) {
+            if (!timestamp) return '';
+            
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) {
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            } else if (diffDays === 1) {
+                return 'Kemarin';
+            } else if (diffDays < 7) {
+                return date.toLocaleDateString([], { weekday: 'short' });
+            } else {
+                return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+            }
+        }
+        
+        function createGroup() {
+            const groupName = groupNameInput.value.trim();
+            
+            if (!groupName) {
+                alert('Nama grup harus diisi');
+                return;
+            }
+            
+            const groupId = generateGroupId();
+            const groupDesc = groupDescInput.value.trim();
+            const createdAt = Date.now();
+            
+            // Create group data
+            const groupData = {
+                id: groupId,
+                name: groupName,
+                description: groupDesc,
+                createdAt: createdAt,
+                createdBy: currentUserId,
+                members: {
+                    [currentUserId]: {
+                        username: currentUsername,
+                        avatar: currentUserAvatar,
+                        joinedAt: createdAt,
+                        isAdmin: true
+                    }
+                },
+                admins: {
+                    [currentUserId]: true
+                }
+            };
+            
+            // Upload group avatar if selected
+            if (groupAvatarInput.files.length > 0) {
+                const file = groupAvatarInput.files[0];
+                const storageRef = groupStorage.ref();
+                const fileRef = storageRef.child(`groups/${groupId}/avatar`);
+                
+                fileRef.put(file)
+                    .then(snapshot => {
+                        return snapshot.ref.getDownloadURL();
+                    })
+                    .then(downloadURL => {
+                        groupData.avatar = downloadURL;
+                        return saveGroupData(groupId, groupData);
+                    })
+                    .catch(error => {
+                        console.error('Error uploading group avatar:', error);
+                        alert('Gagal mengunggah foto grup, membuat grup tanpa foto');
+                        return saveGroupData(groupId, groupData);
+                    });
+            } else {
+                saveGroupData(groupId, groupData);
+            }
+        }
+        
+        function saveGroupData(groupId, groupData) {
+            // Save group to database
+            groupDatabase.ref('groups/' + groupId).set(groupData)
+                .then(() => {
+                    // Add group to user's group list
+                    return groupDatabase.ref('users/' + currentUserId + '/groups/' + groupId).set(true);
+                })
+                .then(() => {
+                    alert(`Grup "${groupData.name}" berhasil dibuat dengan ID: ${groupId}`);
+                    createGroupScreen.classList.add('hidden');
+                    openGroupChat(groupId);
+                })
+                .catch(error => {
+                    console.error('Error creating group:', error);
+                    alert('Gagal membuat grup');
+                });
+        }
+        
+        function joinGroup() {
+            const groupId = groupIdInput.value.trim();
+            
+            if (!groupId) {
+                alert('ID grup harus diisi');
+                return;
+            }
+            
+            // Check if group exists
+            groupDatabase.ref('groups/' + groupId).once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        const groupData = snapshot.val();
+                        
+                        // Check if user is already a member
+                        if (groupData.members && groupData.members[currentUserId]) {
+                            alert('Anda sudah menjadi anggota grup ini');
+                            joinGroupScreen.classList.add('hidden');
+                            openGroupChat(groupId);
+                            return;
+                        }
+                        
+                        // Add user to group
+                        const userData = {
+                            username: currentUsername,
+                            avatar: currentUserAvatar,
+                            joinedAt: Date.now(),
+                            isAdmin: false
+                        };
+                        
+                        return groupDatabase.ref('groups/' + groupId + '/members/' + currentUserId).set(userData)
+                            .then(() => {
+                                // Add group to user's group list
+                                return groupDatabase.ref('users/' + currentUserId + '/groups/' + groupId).set(true);
+                            })
+                            .then(() => {
+                                alert(`Anda berhasil bergabung dengan grup "${groupData.name}"`);
+                                joinGroupScreen.classList.add('hidden');
+                                openGroupChat(groupId);
+                            });
+                    } else {
+                        alert('Grup tidak ditemukan');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error joining group:', error);
+                    alert('Gagal bergabung dengan grup');
+                });
+        }
+        
+        function openGroupChat(groupId) {
+            currentGroupId = groupId;
+            
+            // Load group data
+            groupDatabase.ref('groups/' + groupId).once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        currentGroupData = snapshot.val();
+                        currentGroupMembers = currentGroupData.members || {};
+                        currentGroupAdmins = currentGroupData.admins || {};
+                        
+                        // Update UI
+                        groupChatTitle.textContent = currentGroupData.name;
+                        groupListScreen.classList.add('hidden');
+                        groupChatScreen.classList.remove('hidden');
+                        
+                        // Load group messages
+                        loadGroupMessages();
+                        
+                        // Set up typing indicator listener
+                        setupGroupTypingListener();
+                    } else {
+                        alert('Grup tidak ditemukan');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading group:', error);
+                    alert('Gagal memuat grup');
+                });
+        }
+        
+        function loadGroupMessages() {
+            groupDatabase.ref('groups/' + currentGroupId + '/messages').on('value', snapshot => {
+                groupMessages.innerHTML = '';
+                
+                if (snapshot.exists()) {
+                    const messages = snapshot.val();
+                    const messagesArray = Object.entries(messages);
+                    
+                    // Sort messages by timestamp
+                    messagesArray.sort((a, b) => a[1].timestamp - b[1].timestamp);
+                    
+                    messagesArray.forEach(([messageId, messageData]) => {
+                        const isSent = messageData.sender === currentUserId;
+                        displayGroupMessage(
+                            messageData.message || messageData.caption,
+                            isSent,
+                            messageData.senderName,
+                            messageData.senderAvatar,
+                            messageData.timestamp,
+                            messageId,
+                            messageData.mediaType,
+                            messageData.mediaUrl,
+                            messageData.fileName,
+                            messageData.fileSize,
+                            messageData.edited,
+                            messageData.reactions
+                        );
+                        
+                        // Track the last message ID
+                        lastGroupMessageId = messageId;
+                    });
+                    
+                    // Scroll to bottom
+                    setTimeout(() => {
+                        groupMessages.scrollTop = groupMessages.scrollHeight;
+                    }, 100);
+                }
+            });
+        }
+        
+        function displayGroupMessage(message, isSent, senderName, senderAvatar, timestamp, messageId, mediaType, mediaUrl, fileName, fileSize, edited, reactions) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(isSent ? 'group-message' : 'received');
+            messageDiv.dataset.messageId = messageId;
+            
+            // Add sender info for received messages
+            if (!isSent) {
+                const senderDiv = document.createElement('div');
+                senderDiv.style.display = 'flex';
+                senderDiv.style.alignItems = 'center';
+                senderDiv.style.marginBottom = '5px';
+                
+                const avatarImg = document.createElement('img');
+                avatarImg.src = senderAvatar || '';
+                avatarImg.style.width = '20px';
+                avatarImg.style.height = '20px';
+                avatarImg.style.borderRadius = '50%';
+                avatarImg.style.marginRight = '5px';
+                avatarImg.onerror = () => {
+                    avatarImg.style.display = 'none';
+                };
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = senderName;
+                nameSpan.style.fontWeight = '500';
+                nameSpan.style.fontSize = '12px';
+                
+                senderDiv.appendChild(avatarImg);
+                senderDiv.appendChild(nameSpan);
+                messageDiv.appendChild(senderDiv);
+            }
+            
+            // Add message actions (edit/delete) for sent messages and admins
+            if (isSent || currentGroupAdmins[currentUserId]) {
+                const messageActions = document.createElement('div');
+                messageActions.className = 'message-actions';
+                
+                if (isSent) {
+                    const editAction = document.createElement('div');
+                    editAction.className = 'message-action';
+                    editAction.textContent = '✏️';
+                    editAction.title = 'Edit';
+                    editAction.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        editGroupMessage(messageId, message);
+                    });
+                    
+                    messageActions.appendChild(editAction);
+                }
+                
+                const deleteAction = document.createElement('div');
+                deleteAction.className = 'message-action';
+                deleteAction.textContent = '🗑️';
+                deleteAction.title = 'Delete';
+                deleteAction.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteGroupMessage(messageId);
+                });
+                
+                messageActions.appendChild(deleteAction);
+                messageDiv.appendChild(messageActions);
+            }
+            
+            if (mediaUrl) {
+                if (mediaType === 'image' || mediaType === 'video') {
+                    const mediaDiv = document.createElement('div');
+                    mediaDiv.classList.add('media-message');
+                    
+                    if (mediaType === 'image') {
+                        const img = document.createElement('img');
+                        img.src = mediaUrl;
+                        img.alt = 'Gambar';
+                        mediaDiv.appendChild(img);
+                    } else if (mediaType === 'video') {
+                        const video = document.createElement('video');
+                        video.src = mediaUrl;
+                        video.controls = true;
+                        mediaDiv.appendChild(video);
+                    }
+                    
+                    messageDiv.appendChild(mediaDiv);
+                } else {
+                    // Ini adalah file dokumen
+                    const fileDiv = document.createElement('div');
+                    fileDiv.classList.add('file-message');
+                    
+                    const fileIcon = document.createElement('div');
+                    fileIcon.classList.add('file-icon');
+                    fileIcon.textContent = getFileIcon(mediaType);
+                    
+                    const fileInfoDiv = document.createElement('div');
+                    fileInfoDiv.classList.add('file-info');
+                    
+                    const fileNameDiv = document.createElement('div');
+                    fileNameDiv.classList.add('file-name');
+                    fileNameDiv.textContent = fileName;
+                    
+                    const fileSizeDiv = document.createElement('div');
+                    fileSizeDiv.classList.add('file-size');
+                    fileSizeDiv.textContent = formatFileSize(fileSize);
+                    
+                    const downloadLink = document.createElement('a');
+                    downloadLink.classList.add('file-download');
+                    downloadLink.href = mediaUrl;
+                    downloadLink.target = '_blank';
+                    downloadLink.textContent = 'Unduh';
+                    downloadLink.download = fileName;
+                    
+                    fileInfoDiv.appendChild(fileNameDiv);
+                    fileInfoDiv.appendChild(fileSizeDiv);
+                    fileDiv.appendChild(fileIcon);
+                    fileDiv.appendChild(fileInfoDiv);
+                    fileDiv.appendChild(downloadLink);
+                    
+                    messageDiv.appendChild(fileDiv);
+                }
+            }
+            
+            if (message) {
+                const messageText = document.createElement('div');
+                messageText.textContent = message;
+                messageDiv.appendChild(messageText);
+            }
+            
+            // Create message footer with timestamp
+            const messageFooter = document.createElement('div');
+            messageFooter.className = 'message-footer';
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'timestamp';
+            
+            // Format timestamp according to user's locale and timezone
+            const date = new Date(timestamp);
+            timeDiv.textContent = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            if (edited) {
+                const editedSpan = document.createElement('span');
+                editedSpan.textContent = ' (edited)';
+                editedSpan.style.fontSize = '10px';
+                editedSpan.style.opacity = '0.7';
+                timeDiv.appendChild(editedSpan);
+            }
+            
+            messageFooter.appendChild(timeDiv);
+            messageDiv.appendChild(messageFooter);
+            
+            // Add reactions container
+            const reactionsContainer = document.createElement('div');
+            reactionsContainer.className = 'message-reactions';
+            
+            // Heart reaction
+            const heartReaction = document.createElement('div');
+            heartReaction.className = 'reaction' + (reactions && reactions.heart ? ' active' : '');
+            heartReaction.innerHTML = '❤️';
+            if (reactions && reactions.heart) {
+                const countSpan = document.createElement('span');
+                countSpan.className = 'reaction-count';
+                countSpan.textContent = reactions.heart.count || '';
+                heartReaction.appendChild(countSpan);
+            }
+            heartReaction.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleGroupReaction(messageId, 'heart');
+            });
+            
+            reactionsContainer.appendChild(heartReaction);
+            messageDiv.appendChild(reactionsContainer);
+            
+            groupMessages.appendChild(messageDiv);
+            
+            // Add animation for new messages
+            setTimeout(() => {
+                messageDiv.classList.add('new-message');
+                setTimeout(() => {
+                    messageDiv.classList.remove('new-message');
+                }, 500);
+            }, 10);
+        }
+        
+        function setupGroupTypingListener() {
+            groupDatabase.ref('groups/' + currentGroupId + '/typing').on('value', snapshot => {
+                if (snapshot.exists()) {
+                    const typingUsers = snapshot.val();
+                    const typingUserIds = Object.keys(typingUsers).filter(userId => typingUsers[userId] && userId !== currentUserId);
+                    
+                    if (typingUserIds.length > 0) {
+                        // Get usernames of typing users
+                        const userPromises = typingUserIds.map(userId => {
+                            return groupDatabase.ref('groups/' + currentGroupId + '/members/' + userId + '/username').once('value')
+                                .then(usernameSnapshot => usernameSnapshot.val());
+                        });
+                        
+                        Promise.all(userPromises)
+                            .then(usernames => {
+                                if (usernames.length === 1) {
+                                    groupTypingIndicator.textContent = `${usernames[0]} sedang mengetik...`;
+                                } else if (usernames.length === 2) {
+                                    groupTypingIndicator.textContent = `${usernames[0]} dan ${usernames[1]} sedang mengetik...`;
+                                } else {
+                                    groupTypingIndicator.textContent = `${usernames[0]} dan ${usernames.length - 1} lainnya sedang mengetik...`;
+                                }
+                                groupTypingIndicator.classList.add('active');
+                            });
+                    } else {
+                        groupTypingIndicator.textContent = '';
+                        groupTypingIndicator.classList.remove('active');
+                    }
+                } else {
+                    groupTypingIndicator.textContent = '';
+                    groupTypingIndicator.classList.remove('active');
+                }
+            });
+        }
+        
+        function sendGroupMessage() {
+            const messageText = groupMessageInput.value.trim();
+            
+            if (!messageText && !currentGroupSelectedFile) {
+                return;
+            }
+            
+            const timestamp = Date.now();
+            const messageId = groupDatabase.ref('groups/' + currentGroupId + '/messages').push().key;
+            
+            if (currentGroupSelectedFile) {
+                // Upload file ke Firebase Storage
+                uploadGroupFile(messageId, timestamp, messageText);
+            } else {
+                // Kirim pesan teks biasa
+                const messageData = {
+                    sender: currentUserId,
+                    senderName: currentUsername,
+                    senderAvatar: currentUserAvatar,
+                    message: messageText,
+                    timestamp: timestamp,
+                    reactions: {} // Initialize reactions
+                };
+                
+                // Save message to group
+                groupDatabase.ref('groups/' + currentGroupId + '/messages/' + messageId).set(messageData)
+                    .then(() => {
+                        // Update last message in group
+                        return groupDatabase.ref('groups/' + currentGroupId + '/lastMessage').set({
+                            text: messageText,
+                            timestamp: timestamp,
+                            sender: currentUserId
+                        });
+                    })
+                    .then(() => {
+                        groupMessageInput.value = '';
+                        currentGroupSelectedFile = null;
+                        groupFileInput.value = '';
+                        groupFilePreview.classList.add('hidden');
+                        groupDatabase.ref('groups/' + currentGroupId + '/typing/' + currentUserId).set(null);
+                        isGroupTyping = false;
+                    })
+                    .catch((error) => {
+                        console.error('Error sending group message:', error);
+                        alert('Terjadi kesalahan saat mengirim pesan');
+                    });
+            }
+        }
+        
+        function uploadGroupFile(messageId, timestamp, caption) {
+            const storageRef = groupStorage.ref();
+            const fileRef = storageRef.child(`groups/${currentGroupId}/${messageId}_${currentGroupSelectedFile.name}`);
+            
+            // Tampilkan indikator upload
+            const uploadTask = fileRef.put(currentGroupSelectedFile);
+            
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log('Upload progress: ' + progress + '%');
+                },
+                (error) => {
+                    console.error('Upload error:', error);
+                    alert('Gagal mengunggah file');
+                },
+                () => {
+                    // Upload complete, get download URL
+                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                        // Determine media type
+                        let mediaType = 'file';
+                        if (currentGroupSelectedFile.type.includes('image')) {
+                            mediaType = 'image';
+                        } else if (currentGroupSelectedFile.type.includes('video')) {
+                            mediaType = 'video';
+                        }
+                        
+                        // Save message with file info
+                        const messageData = {
+                            sender: currentUserId,
+                            senderName: currentUsername,
+                            senderAvatar: currentUserAvatar,
+                            caption: caption,
+                            timestamp: timestamp,
+                            mediaType: mediaType,
+                            mediaUrl: downloadURL,
+                            fileName: currentGroupSelectedFile.name,
+                            fileSize: currentGroupSelectedFile.size,
+                            reactions: {} // Initialize reactions
+                        };
+                        
+                        // Save message to group
+                        groupDatabase.ref('groups/' + currentGroupId + '/messages/' + messageId).set(messageData)
+                            .then(() => {
+                                // Update last message in group
+                                return groupDatabase.ref('groups/' + currentGroupId + '/lastMessage').set({
+                                    text: caption || `Mengirim file: ${currentGroupSelectedFile.name}`,
+                                    timestamp: timestamp,
+                                    sender: currentUserId
+                                });
+                            })
+                            .then(() => {
+                                groupMessageInput.value = '';
+                                currentGroupSelectedFile = null;
+                                groupFileInput.value = '';
+                                groupFilePreview.classList.add('hidden');
+                                groupDatabase.ref('groups/' + currentGroupId + '/typing/' + currentUserId).set(null);
+                                isGroupTyping = false;
+                            });
+                    });
+                }
+            );
+        }
+        
+        function editGroupMessage(messageId, currentText) {
+            currentlyEditingMessageId = messageId;
+            editMessageInput.value = currentText;
+            editModal.classList.add('show');
+            editMessageInput.focus();
+        }
+        
+        function deleteGroupMessage(messageId) {
+            if (confirm('Apakah Anda yakin ingin menghapus pesan ini?')) {
+                groupDatabase.ref('groups/' + currentGroupId + '/messages/' + messageId).remove()
+                    .then(() => {
+                        // Update last message if needed
+                        if (messageId === lastGroupMessageId) {
+                            return groupDatabase.ref('groups/' + currentGroupId + '/messages').orderByChild('timestamp').limitToLast(1).once('value')
+                                .then(snapshot => {
+                                    if (snapshot.exists()) {
+                                        const messages = snapshot.val();
+                                        const lastMessage = Object.values(messages)[0];
+                                        return groupDatabase.ref('groups/' + currentGroupId + '/lastMessage').set({
+                                            text: lastMessage.message || lastMessage.caption || 'File',
+                                            timestamp: lastMessage.timestamp,
+                                            sender: lastMessage.sender
+                                        });
+                                    } else {
+                                        return groupDatabase.ref('groups/' + currentGroupId + '/lastMessage').remove();
+                                    }
+                                });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting group message:', error);
+                        alert('Gagal menghapus pesan');
+                    });
+            }
+        }
+        
+        function toggleGroupReaction(messageId, reactionType) {
+            const messageRef = groupDatabase.ref('groups/' + currentGroupId + '/messages/' + messageId + '/reactions/' + reactionType);
+            
+            messageRef.transaction((current) => {
+                if (current) {
+                    // Toggle user's reaction
+                    if (current.users && current.users[currentUserId]) {
+                        // User already reacted - remove reaction
+                        current.count = (current.count || 1) - 1;
+                        delete current.users[currentUserId];
+                    } else {
+                        // User hasn't reacted - add reaction
+                        current.count = (current.count || 0) + 1;
+                        if (!current.users) current.users = {};
+                        current.users[currentUserId] = true;
+                    }
+                } else {
+                    // Create new reaction
+                    current = {
+                        count: 1,
+                        users: {
+                            [currentUserId]: true
+                        }
+                    };
+                }
+                return current;
+            });
+        }
+        
+        function showGroupInfo() {
+            if (!currentGroupData) return;
+            
+            // Update group info modal
+            groupInfoTitle.textContent = currentGroupData.name;
+            groupInfoName.textContent = currentGroupData.name;
+            groupInfoAvatar.src = currentGroupData.avatar || '';
+            groupInfoAvatar.onerror = () => {
+                groupInfoAvatar.src = '';
+                groupInfoAvatar.textContent = currentGroupData.name.charAt(0).toUpperCase();
+            };
+            
+            // Count members
+            const memberCount = Object.keys(currentGroupMembers).length;
+            groupInfoMembers.textContent = `${memberCount} anggota`;
+            
+            // Display members list
+            groupMembersList.innerHTML = '';
+            
+            Object.entries(currentGroupMembers).forEach(([userId, memberData]) => {
+                const memberItem = document.createElement('div');
+                memberItem.className = 'member-item';
+                
+                const avatarImg = document.createElement('img');
+                avatarImg.src = memberData.avatar || '';
+                avatarImg.className = 'member-avatar';
+                avatarImg.onerror = () => {
+                    avatarImg.style.display = 'none';
+                };
+                
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'member-name';
+                nameDiv.textContent = memberData.username;
+                
+                const roleDiv = document.createElement('div');
+                roleDiv.className = 'member-role';
+                roleDiv.textContent = currentGroupAdmins[userId] ? 'Admin' : 'Anggota';
+                
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'member-actions';
+                
+                // Only show actions for admins (and not for yourself)
+                if (currentGroupAdmins[currentUserId] && userId !== currentUserId) {
+                    const makeAdminBtn = document.createElement('button');
+                    makeAdminBtn.className = 'member-action';
+                    makeAdminBtn.textContent = currentGroupAdmins[userId] ? '✖️' : '👑';
+                    makeAdminBtn.title = currentGroupAdmins[userId] ? 'Hapus admin' : 'Jadikan admin';
+                    makeAdminBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleAdminStatus(userId, !currentGroupAdmins[userId]);
+                    });
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'member-action';
+                    removeBtn.textContent = '✕';
+                    removeBtn.title = 'Keluarkan dari grup';
+                    removeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        removeMemberFromGroup(userId);
+                    });
+                    
+                    actionsDiv.appendChild(makeAdminBtn);
+                    actionsDiv.appendChild(removeBtn);
+                }
+                
+                memberItem.appendChild(avatarImg);
+                memberItem.appendChild(nameDiv);
+                memberItem.appendChild(roleDiv);
+                memberItem.appendChild(actionsDiv);
+                groupMembersList.appendChild(memberItem);
+            });
+            
+            // Show/hide admin controls based on user's role
+            addMemberBtn.style.display = currentGroupAdmins[currentUserId] ? 'block' : 'none';
+            editGroupNameBtn.style.display = currentGroupAdmins[currentUserId] ? 'block' : 'none';
+            editGroupAvatarBtn.style.display = currentGroupAdmins[currentUserId] ? 'block' : 'none';
+            editGroupDescBtn.style.display = currentGroupAdmins[currentUserId] ? 'block' : 'none';
+            
+            groupInfoModal.classList.add('show');
+        }
+        
+        function toggleAdminStatus(userId, makeAdmin) {
+            if (!currentGroupAdmins[currentUserId]) {
+                alert('Hanya admin yang dapat mengubah status admin');
+                return;
+            }
+            
+            if (makeAdmin) {
+                groupDatabase.ref('groups/' + currentGroupId + '/admins/' + userId).set(true)
+                    .then(() => {
+                        alert('Berhasil menjadikan admin');
+                        currentGroupAdmins[userId] = true;
+                        showGroupInfo(); // Refresh view
+                    })
+                    .catch(error => {
+                        console.error('Error making admin:', error);
+                        alert('Gagal menjadikan admin');
+                    });
+            } else {
+                groupDatabase.ref('groups/' + currentGroupId + '/admins/' + userId).remove()
+                    .then(() => {
+                        alert('Berhasil menghapus admin');
+                        delete currentGroupAdmins[userId];
+                        showGroupInfo(); // Refresh view
+                    })
+                    .catch(error => {
+                        console.error('Error removing admin:', error);
+                        alert('Gagal menghapus admin');
+                    });
+            }
+        }
+        
+        function removeMemberFromGroup(userId) {
+            if (!currentGroupAdmins[currentUserId]) {
+                alert('Hanya admin yang dapat mengeluarkan anggota');
+                return;
+            }
+            
+            if (confirm(`Apakah Anda yakin ingin mengeluarkan ${currentGroupMembers[userId].username} dari grup?`)) {
+                // Remove from group members
+                groupDatabase.ref('groups/' + currentGroupId + '/members/' + userId).remove()
+                    .then(() => {
+                        // Remove from admins if they were admin
+                        return groupDatabase.ref('groups/' + currentGroupId + '/admins/' + userId).remove();
+                    })
+                    .then(() => {
+                        // Remove group from user's group list
+                        return groupDatabase.ref('users/' + userId + '/groups/' + currentGroupId).remove();
+                    })
+                    .then(() => {
+                        alert('Anggota berhasil dikeluarkan');
+                        delete currentGroupMembers[userId];
+                        delete currentGroupAdmins[userId];
+                        showGroupInfo(); // Refresh view
+                    })
+                    .catch(error => {
+                        console.error('Error removing member:', error);
+                        alert('Gagal mengeluarkan anggota');
+                    });
+            }
+        }
+        
+        function addMemberToGroup() {
+            const newMemberId = newMemberIdInput.value.trim();
+            
+            if (!newMemberId) {
+                alert('ID pengguna harus diisi');
+                return;
+            }
+            
+            if (newMemberId === currentUserId) {
+                alert('Anda tidak dapat menambahkan diri sendiri');
+                return;
+            }
+            
+            // Check if user is already a member
+            if (currentGroupMembers[newMemberId]) {
+                alert('Pengguna sudah menjadi anggota grup');
+                return;
+            }
+            
+            // Check if user exists
+            groupDatabase.ref('users/' + newMemberId).once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        const userData = snapshot.val();
+                        
+                        // Add user to group
+                        const memberData = {
+                            username: userData.username,
+                            avatar: userData.avatar,
+                            joinedAt: Date.now(),
+                            isAdmin: false
+                        };
+                        
+                        return groupDatabase.ref('groups/' + currentGroupId + '/members/' + newMemberId).set(memberData)
+                            .then(() => {
+                                // Add group to user's group list
+                                return groupDatabase.ref('users/' + newMemberId + '/groups/' + currentGroupId).set(true);
+                            })
+                            .then(() => {
+                                alert(`Berhasil menambahkan ${userData.username} ke grup`);
+                                addMemberModal.classList.remove('show');
+                                newMemberIdInput.value = '';
+                                
+                                // Update local data and refresh view
+                                currentGroupMembers[newMemberId] = memberData;
+                                showGroupInfo();
+                            });
+                    } else {
+                        alert('Pengguna tidak ditemukan');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding member:', error);
+                    alert('Gagal menambahkan anggota');
+                });
+        }
+        
+        function leaveGroup() {
+            if (Object.keys(currentGroupAdmins).length === 1 && currentGroupAdmins[currentUserId]) {
+                alert('Anda adalah satu-satunya admin. Anda tidak dapat keluar dari grup sebelum menunjuk admin lain.');
+                return;
+            }
+            
+            if (confirm('Apakah Anda yakin ingin keluar dari grup ini?')) {
+                // Remove user from group members
+                groupDatabase.ref('groups/' + currentGroupId + '/members/' + currentUserId).remove()
+                    .then(() => {
+                        // Remove user from admins if they were admin
+                        return groupDatabase.ref('groups/' + currentGroupId + '/admins/' + currentUserId).remove();
+                    })
+                    .then(() => {
+                        // Remove group from user's group list
+                        return groupDatabase.ref('users/' + currentUserId + '/groups/' + currentGroupId).remove();
+                    })
+                    .then(() => {
+                        alert('Anda telah keluar dari grup');
+                        groupInfoModal.classList.remove('show');
+                        groupChatScreen.classList.add('hidden');
+                        loadUserGroups(); // Return to group list
+                    })
+                    .catch(error => {
+                        console.error('Error leaving group:', error);
+                        alert('Gagal keluar dari grup');
+                    });
+            }
+        }
+        
+        // Initialize themes
+        initThemes();
+        
+        // Check for saved user profile
+        const savedProfile = localStorage.getItem('groupChatUser');
+        if (savedProfile) {
+            const profile = JSON.parse(savedProfile);
+            currentUserId = profile.id;
+            currentUsername = profile.username;
+            currentUserAvatar = profile.avatar;
+            
+            usernameInput.value = currentUsername;
+            loadUserGroups();
+        }
+        
+        // Set up visibility change listener to update online status
+        document.addEventListener('visibilitychange', () => {
+            if (currentCoupleId && currentUser) {
+                updateUserStatus(!document.hidden);
+            }
+        });
+        
+        // Clean up when window is closed
+        window.addEventListener('beforeunload', () => {
+            if (currentCoupleId && currentUser) {
+                updateUserStatus(false);
+                if (currentCallId) {
+                    endCall();
+                }
+            }
+            
+            // Set group typing status to false
+            if (currentGroupId && currentUserId) {
+                groupDatabase.ref('groups/' + currentGroupId + '/typing/' + currentUserId).set(null);
+            }
+        });
+    </script>
+</body>
+</html>
